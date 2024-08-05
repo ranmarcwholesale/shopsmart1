@@ -1,0 +1,72 @@
+/* src/Checkout.css */
+.checkout {
+    display: flex;
+    justify-content: space-between;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+  
+  .checko1  ut__left {
+    flex: 0.7;
+    padding: 20px;
+  }
+  
+  .checkout__ad {
+    width: 100%;
+    max-width: 100%; /* Ensure the ad image does not exceed container width */
+    object-fit: contain;2
+    margin-bottom: 10px;
+  }
+  
+  .checkout__title {
+    font-size: 28px;
+    font-weight: 400;
+    margin-right: 10px;
+    padding: 10px;
+    border-bottom: 1px solid lightgray;
+  }
+  
+  .checkout__product {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .checkout__product img {
+    object-fit: contain;
+    width: 180px;
+    height: 180px;
+  }
+  
+  .checkout__productInfo {
+    padding-left: 20px;
+  }
+  
+  .checkout__productPrice {
+    margin-top: 10px;
+  }
+  
+  .checkout__productRating span {
+    color: #f0c14b;
+  }
+  
+  .checkout__productControls {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .checkout__productControls button {
+    background-color: #f0c14b;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .checkout__right {
+    flex: 0.3;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid lightgray;
+  }
+  
