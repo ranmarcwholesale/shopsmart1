@@ -13,7 +13,7 @@
   .checkout__ad {
     width: 100%;
     max-width: 100%; /* Ensure the ad image does not exceed container width */
-    object-fit: contain;2
+    object-fit: contain;
     margin-bottom: 10px;
   }
   

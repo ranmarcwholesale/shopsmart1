@@ -5,9 +5,9 @@ import product1 from './Components/images/product1.jpg';
 import product2 from './Components/images/product2.webp'; 
 import product3 from './Components/images/product3.webp'; 
 import product4 from './Components/images/product4.webp'; 
-import jamun from './Components/images/jamun.jpg';
-import shop from './Components/images/shopping.gif';
-import tom from './Components/images/tom.jpg';
+import jamun from './Components/images/product2.webp';
+import shop from './Components/images/product2.webp';
+import tom from './Components/images/product2.webp';
 
 function Home({ onAddToBasket ,onRemoveFromBasket,basket }) {
   const products = [
