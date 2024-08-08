@@ -1,42 +1,69 @@
-// src/shopsmart-backend/seed.js
+// Seed.js:
+//A separate script for populating the database with initial product data.
+//Connects to MongoDB, clears existing data, inserts new data, and then disconnects.
+//Execution:
+//Run manually using Node.js to populate the database.
+require('dotenv').config(); // Load environment variables from .env file
 const mongoose = require('mongoose');
-const Product = require('./models/Product');
-require('dotenv').config();
+const Product = require('./models/Product'); // Adjust path as needed
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+const uri = process.env.MONGODB_URI; // Retrieve MongoDB URI from environment variables
 
-const products = [
-  {
-    name: 'Product 1',
-    price: 10.99,
-    category: 'Category 1',
-    imageUrl: 'https://via.placeholder.com/150?text=Product+1',
-    rating: 4.5, // Example rating
-    quantityAvailable: 100 // Example quantity
-  },
-  {
-    name: 'Product 2',
-    price: 20.99,
-    category: 'Category 2',
-    imageUrl: 'https://via.placeholder.com/150?text=Product+2',
-    rating: 3.8,
-    quantityAvailable: 50
-  },
-  {
-    name: 'Product 3',
-    price: 30.99,
-    category: 'Category 3',
-    imageUrl: 'https://via.placeholder.com/150?text=Product+3',
-    rating: 4.2,
-    quantityAvailable: 200
-  }
-];
+if (!uri) {
+  console.error('MONGODB_URI is not defined in .env file');
+  process.exit(1);
+}
 
-Product.insertMany(products)
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log('Products seeded');
-    mongoose.connection.close();
+    console.log('MongoDB connected');
+    return Product.deleteMany({}); // Clear existing data
+  })
+  .then(() => {
+    // Define dummy data with required fields
+    const products = [
+      {
+        name: 'Bananas',
+        imageUrl: 'product1.jpg', // Use relative path
+        price: 1.99,
+        rating: 5,
+        quantityAvailable: 10,
+        category: 'Fruits'
+      },
+      {
+        name: 'Apples',
+        imageUrl: 'product2.webp', // Use relative path
+        price: 2.99,
+        rating: 4,
+        quantityAvailable: 20,
+        category: 'Fruits'
+      },
+      {
+        name: 'Oranges',
+        imageUrl: 'product3.webp', // Use relative path
+        price: 3.99,
+        rating: 4,
+        quantityAvailable: 15,
+        category: 'Fruits'
+      },
+      {
+        name: 'Watermelon',
+        imageUrl: 'product4.webp', // Use relative path
+        price: 7.99,
+        rating: 3,
+        quantityAvailable: 5,
+        category: 'Fruits'
+      }
+    ];
+
+    // Insert dummy data into the database
+    return Product.insertMany(products);
+  })
+  .then(() => {
+    console.log('Dummy data inserted');
+    mongoose.disconnect(); // Close connection
   })
   .catch(err => {
-    console.error('Error seeding products:', err);
+    console.error(err);
+    mongoose.disconnect(); // Close connection on error
   });
