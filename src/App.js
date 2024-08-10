@@ -5,6 +5,7 @@ import Header from './Header';
 import Home from './Home';
 import Checkout from './Checkout';
 import Login from './Login';
+import Register from './Register';
 import SidePanel from './SidePanel';
 import './App.css';
 
@@ -50,7 +51,7 @@ function App() {
   };
 
   return (
-    <Router>
+    <Router> 
       <div className="App">
         <Routes>
           <Route
@@ -74,6 +75,10 @@ function App() {
                 />
               </>
             }
+          />
+          <Route
+            path='/Register'
+            element={<Register/>}
           />
           <Route
             path='/'
