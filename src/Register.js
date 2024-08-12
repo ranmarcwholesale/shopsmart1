@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import './Register.css';
+import logo from './Components/images/Logo.png'; 
+import { Link } from 'react-router-dom';
+
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [name, setName] = useState(''); // Add this line
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!email || !password || !phone || !address) {
+    if (!email || !password || !phone || !address || !name) {
       alert("Please fill in all fields");
       return;
     }
@@ -25,7 +29,8 @@ const Register = () => {
           email,
           password,
           phone,
-          address
+          address,
+          name // Add this line
         }),
       });
 
@@ -46,10 +51,18 @@ const Register = () => {
   };
 
   return (
-    <div className="login">
-      <div className="login__container">
+    <div className="register">
+         <div className='login__logo'>
+        <Link to='/'>
+        <img className="header__logo" src={logo} alt="Logo" />
+      </Link>
+      </div>
+      <div className="register__container">
         <h1>Create Your ShopSmart Account</h1>
         <form>
+          <h5>Name</h5>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+
           <h5>Email</h5>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
@@ -62,7 +75,7 @@ const Register = () => {
           <h5>Address</h5>
           <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
 
-          <button type="button" className="login__registerButton" onClick={handleRegister}>
+          <button type="button" className="register__button" onClick={handleRegister}>
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './Header';
@@ -6,12 +5,15 @@ import Home from './Home';
 import Checkout from './Checkout';
 import Login from './Login';
 import Register from './Register';
+import Payment from './Payment'; // Import the Payment component
+import StripePayment from './StripePayment'; // Import the new StripePayment component
 import SidePanel from './SidePanel';
 import './App.css';
 
 function App() {
   const [basket, setBasket] = useState([]);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [user, setUser] = useState(null); // Add user state
 
   const handleAddToBasket = (product) => {
     setBasket((prevBasket) => {
@@ -51,18 +53,22 @@ function App() {
   };
 
   return (
-    <Router> 
+    <Router>
       <div className="App">
         <Routes>
           <Route
             path='/login'
-            element={<Login />}
+            element={<Login setUser={setUser} />} // Pass setUser function to Login
           />
           <Route
             path='/checkout'
             element={
               <>
-                <Header basketCount={basket.reduce((count, item) => count + item.quantity, 0)} onMenuClick={handleMenuClick} />
+                <Header
+                  basketCount={basket.reduce((count, item) => count + item.quantity, 0)}
+                  onMenuClick={handleMenuClick}
+                  user={user} // Pass user state to Header
+                />
                 {isPanelOpen && (
                   <div className="overlay" onClick={handleClosePanel}>
                     <SidePanel onClose={handleClosePanel} />
@@ -72,19 +78,32 @@ function App() {
                   basket={basket}
                   onAddToBasket={handleAddToBasket}
                   onRemoveFromBasket={handleRemoveFromBasket}
+                  user={user} // Pass user state to Checkout
                 />
               </>
             }
           />
           <Route
-            path='/Register'
-            element={<Register/>}
+            path='/register'
+            element={<Register />}
+          />
+          <Route
+            path='/payment'
+            element={<Payment user={user} basket={basket} />} // Add the payment route
+          />
+          <Route
+            path='/stripe-payment'
+            element={<StripePayment />} // Add the StripePayment route
           />
           <Route
             path='/'
             element={
               <>
-                <Header basketCount={basket.reduce((count, item) => count + item.quantity, 0)} onMenuClick={handleMenuClick} />
+                <Header
+                  basketCount={basket.reduce((count, item) => count + item.quantity, 0)}
+                  onMenuClick={handleMenuClick}
+                  user={user} // Pass user state to Header
+                />
                 {isPanelOpen && (
                   <div className="overlay" onClick={handleClosePanel}>
                     <SidePanel onClose={handleClosePanel} />

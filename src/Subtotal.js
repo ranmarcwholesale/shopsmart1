@@ -8,9 +8,10 @@ function Subtotal({ basket }) {
 
   return (
     <div className='subtotal'>
-      <p>
-        Subtotal ({basket.reduce((count, item) => count + item.quantity, 0)} items): <strong>${calculateSubtotal()}</strong>
-      </p>
+      <div className='checkout__summaryItem'>
+        <span>Subtotal ({basket.reduce((count, item) => count + item.quantity, 0)} items):</span>
+        <span>${calculateSubtotal()}</span>
+      </div>
     </div>
   );
 }

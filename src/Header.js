@@ -1,4 +1,3 @@
-// src/Header.js
 import React from 'react';
 import './Header.css';
 import logo from './Components/images/Logo.png'; 
@@ -7,7 +6,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import { Link } from 'react-router-dom';
 
-function Header({ basketCount, onMenuClick }) {
+function Header({ basketCount, onMenuClick, user }) { // Add user prop
   return (
     <div className='header'>
       <div className="header__Menu" onClick={onMenuClick}>
@@ -23,21 +22,32 @@ function Header({ basketCount, onMenuClick }) {
         </div>
       </div>
       <div className='header__nav'>
-      <Link to="/Login">
-        <div className='header__option'>
-          <span className='header__optionlineOne'>Hello Guest</span>
-          <span className='header__optionlineTwo'>Sign In</span>
+      <Link to="/login">
+        <div>
+        {user ? (
+          <div className='header__option'>
+            <span className='header__optionlineOne'>Hello</span>
+            <span className='header__optionlineTwo'> {user.name}</span>
+          </div>
+        ) : (
+          
+            <div className='header__option'>
+              <span className='header__optionlineOne'>Hello Guest</span>
+              <span className='header__optionlineTwo'>Sign In</span>
+            </div>
+        )}
         </div>
         </Link>
+        <div/>
         <div className='header__option'>
           <span className='header__optionlineOne'>Your</span>
           <span className='header__optionlineTwo'>Orders</span>
         </div>
         <Link to="/checkout">
-        <div className='header__cart'>
+          <div className='header__cart'>
             <ShoppingBasketIcon />
-          <span className='header__optionlineTwo header__basketCount'>{basketCount}</span>
-        </div>
+            <span className='header__optionlineTwo header__basketCount'>{basketCount}</span>
+          </div>
         </Link>
       </div>
     </div>
