@@ -8,7 +8,9 @@ function SidePanel({ onClose }) {
       <Link to="/login" className="sidePanel__link">
         <button className="sidePanel__Login" onClick={onClose}>Login</button>
       </Link>
+      <Link to="/Register" className="sidePanel__link">
       <button className="sidePanel__Signup" onClick={onClose}>Signup</button>
+      </Link>
     </div>
   );
 }

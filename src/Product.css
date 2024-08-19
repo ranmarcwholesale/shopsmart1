@@ -1,21 +1,22 @@
 .product {
-  display: block; /* Use block for better control */
-  width: 220px; /* Slightly increase width */
-  height: 300px; /* Increase height slightly for better spacing */
+  display: block;
+  width: 220px;
+  height: 320px; /* Adjust height if needed */
   padding: 15px;
   margin: 10px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   box-sizing: border-box;
-  text-align: center; /* Center-align text */
-  position: relative; /* Required for absolute positioning of buttons */
+  text-align: center;
+  position: relative; /* Ensure relative positioning for absolute children */
+  overflow: hidden; /* Prevent overflow issues */
 }
 
 .product__image {
   width: 100%;
-  height: 150px; /* Fixed height for image */
-  object-fit: cover; /* Ensure image fits properly */
+  height: 150px;
+  object-fit: cover;
   margin-bottom: 10px;
 }
 
@@ -39,42 +40,45 @@
 }
 
 .product__rating {
-  margin-top: 0px; /* Reduced margin to move rating up */
-  font-size: 16px; /* Adjust font size if needed */
+  margin-top: 10px; /* Add space above rating */
+  margin-bottom: 50px; /* Ensure space below rating */
+  font-size: 16px;
   color: gold;
-  display: flex; /* Flexbox to align stars horizontally */
-  justify-content: center; /* Center-align stars */
-  align-items: center; /* Center-align stars vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ /* Ensure it stays within container */
+  z-index: 1; /* Make sure it’s above other content if needed */
 }
 
-
 .product__rating .full-star {
-  margin-right: 2px; /* Add space between full stars */
+  margin-right: 2px;
 }
 
 .product__rating .half-star {
   position: relative;
-  margin-left: 2px; /* Space between half star and next full star */
+  margin-left: 2px;
 }
 
 .product__rating .half-star::before {
-  content: '★'; /* Unicode star character */
-  color: gold; /* Full star color */
+  content: '★';
+  color: gold;
   position: absolute;
   left: 0;
-  width: 50%; /* Half star */
+  width: 50%;
   overflow: hidden;
 }
 
 .product__controls {
   position: absolute;
-  bottom: 10px; /* Adjust spacing from bottom */
+  bottom: 15px; /* Spacing from bottom */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: calc(100% - 10px); /* Full width with some margin */
+  width: calc(100% - 10px); /* Ensure it fits within container */
+  z-index: 2; /* Ensure controls are on top of other elements */
 }
 
 .product__addButton, .product__removeButton {
