@@ -10,6 +10,7 @@ const taxRate = 0.08; // Example tax rate of 8%
 function Checkout({ basket, onAddToBasket, onRemoveFromBasket, user }) {
   const navigate = useNavigate();
 
+  // Calculate subtotal, taxes, and estimated total
   const calculateSubtotal = () => {
     return basket.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
   };
@@ -32,30 +33,34 @@ function Checkout({ basket, onAddToBasket, onRemoveFromBasket, user }) {
         <h1 className='checkout__title'>Your Shopping Cart</h1>
         <img className='checkout__ad' src={ad_2} alt='advertisement' />
         <div className='checkout__products'>
-          {basket.map((item) => (
-            <div key={item.id} className='checkout__product'>
-              <img src={item.image} alt={item.title} />
-              <div className='checkout__productInfo'>
-                <p>{item.title}</p>
-                <p className='checkout__productPrice'>
-                  <small>$</small>
-                  <strong>{item.price}</strong>
-                </p>
-                <div className='checkout__productRating'>
-                  {Array(item.rating)
-                    .fill()
-                    .map((_, i) => (
+          {basket.map((item) => {
+            // Ensure item.rating is a valid number
+            const rating = parseFloat(item.rating) || 0;
+            const ratingArray = Array(Math.max(0, Math.round(rating))).fill();
+            
+            return (
+              <div key={item.id} className='checkout__product'>
+                <img src={item.image} alt={item.title} />
+                <div className='checkout__productInfo'>
+                  <p>{item.title}</p>
+                  <p className='checkout__productPrice'>
+                    <small>$</small>
+                    <strong>{item.price}</strong>
+                  </p>
+                  <div className='checkout__productRating'>
+                    {ratingArray.map((_, i) => (
                       <span key={i}>★</span>
                     ))}
-                </div>
-                <div className='checkout__productControls'>
-                  <button onClick={() => onRemoveFromBasket(item)}>-</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => onAddToBasket(item)}>+</button>
+                  </div>
+                  <div className='checkout__productControls'>
+                    <button onClick={() => onRemoveFromBasket(item)}>-</button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => onAddToBasket(item)}>+</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <div className='checkout__right'>

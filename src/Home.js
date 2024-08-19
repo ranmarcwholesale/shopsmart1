@@ -8,7 +8,7 @@ function Home({ onAddToBasket, onRemoveFromBasket, basket }) {
 
   useEffect(() => {
     // Fetch products from the API
-    axios.get('http://localhost:5000/products')
+    axios.get('http://localhost:5000/api/products2')
       .then(response => {
         setProducts(response.data);
       })
@@ -29,10 +29,10 @@ function Home({ onAddToBasket, onRemoveFromBasket, basket }) {
           <Product
             key={product._id}
             id={product._id}
-            title={product.title}
-            price={product.price}
-            rating={product.rating}
-            image={product.imageUrl} // Ensure this URL is correct
+            title={product['Product Name']}
+            price={parseFloat(product.Price) || 0} // Convert price to a number
+            rating={product['Star Rating']}
+            image={product['Image URL']}
             count={getProductCount(product._id)}
             onAddToBasket={onAddToBasket}
             onRemoveFromBasket={onRemoveFromBasket}

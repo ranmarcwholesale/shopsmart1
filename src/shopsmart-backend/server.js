@@ -6,9 +6,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const axios = require('axios'); // Import Axios
 
 // Ensure that STRIPE_SECRET_KEY is available
-const stripe = require('stripe')('sk_test_51PmmeqAsZ3IOytfPOUqVkm8bjXZVP92A1B5E3LF8Jxez3zKSqouRabW8z5FtTcAtslcqm1Hm7MfJ3fzr9vu4d3D600e8JYwOnB'); // Import Stripe with your secret key
+const stripe = require('stripe')('sk_test_51PmmeqAsZ3IOytfPOUqVkm8bjXZVP92A1B5E3LF8Jxez3zKSqouRabW8z5FtTcAtslcqm1Hm7MfJ3fzr9vu4d3D600e8JYwOnB'); // Use your Stripe secret key from the environment variables
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -38,16 +39,19 @@ const Customer = mongoose.model('Customer', customerSchema);
 
 // Define Product Schema and Model
 const productSchema = new mongoose.Schema({
-  title: String,
-  image: String,
-  price: Number,
-  rating: Number,
-  quantity: Number
+  title: { type: String, required: true },
+  image: { type: String, required: true },
+  price: { type: Number, required: true },
+  rating: { type: Number, default: 0 },
+  quantity: { type: Number, required: true },
+  description: { type: String },
+  category: { type: String },
+  stock: { type: Number, default: 0 },
 });
 
 const Product = mongoose.model('Product', productSchema);
 
-// Products Route
+// Products Route (Local MongoDB)
 app.get('/products', async (req, res) => {
   try {
     const products = await Product.find();
@@ -56,6 +60,108 @@ app.get('/products', async (req, res) => {
     res.status(500).json({ message: 'Error fetching products', error: err.message });
   }
 });
+
+
+const product2Schema = new mongoose.Schema({
+  ProductName: { type: String, required: true },
+  Price: { type: String, required: true },
+  StarRating: { type: String, required: true },
+  ImageURL: { type: String, required: true }
+});
+
+const Product2 = mongoose.model('Product2', product2Schema);
+
+// Route to get products from MongoDB
+// Server code (server.js or app.js)
+// Ensure this route is set up in your server file
+app.get('/api/products2', async (req, res) => {
+  try {
+    const products = await mongoose.connection.db.collection('products2').find().toArray();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching products', error: err.message });
+  }
+});
+
+
+
+
+// Open Food Facts API Route
+app.get('/api/openfoodfacts', async (req, res) => {
+  const { code, search } = req.query; // Get product barcode or search term from query parameters
+
+  try {
+    if (code) {
+      // Fetch product details by barcode
+      const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+      const product = response.data.product;
+
+      if (product) {
+        res.json({
+          title: product.product_name || 'No Title',
+          image: product.image_url || '',
+          price: product.price || 0,
+          rating: product.nutrition_grades_tags ? product.nutrition_grades_tags.join(', ') : 'No Rating',
+          description: product.ingredients_text || '',
+          category: product.categories_tags ? product.categories_tags.join(', ') : '',
+          stock: product.quantity ? 10 : 0 // Example stock
+        });
+      } else {
+        res.status(404).json({ message: 'Product not found' });
+      }
+    } else if (search) {
+      // Search for products by name
+      const response = await axios.get(`https://world.openfoodfacts.org/api/v0/products.json`, {
+        params: { search_terms: search }
+      });
+
+      const products = response.data.products.map(product => ({
+        title: product.product_name || 'No Title',
+        image: product.image_url || '',
+        price: product.price || 0,
+        rating: product.nutrition_grades_tags ? product.nutrition_grades_tags.join(', ') : 'No Rating',
+        description: product.ingredients_text || '',
+        category: product.categories_tags ? product.categories_tags.join(', ') : '',
+        stock: product.quantity ? 10 : 0 // Example stock
+      }));
+
+      res.json(products);
+    } else {
+      res.status(400).json({ message: 'Either product code or search term is required' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching products from Open Food Facts', error: err.message });
+  }
+});
+
+// Spoonacular API Route
+app.get('/api/spoonacular', async (req, res) => {
+  try {
+    const response = await axios.get(`https://api.spoonacular.com/food/products/search`, {
+      params: {
+        query: req.query.query || 'grocery',
+        number: 10,
+        apiKey: '4c8fa578fe0e4901a0461ce74a44de62' // Replace with your actual API key
+      }
+    });
+
+    const products = response.data.products.map(product => ({
+      title: product.title || 'No Title',
+      image: product.image || '', // Use a default image or empty string if not available
+      price: product.price || 0,
+      rating: product.rating || 0,
+      quantity: (product.servings && product.servings.size) ? product.servings.size : 1, // Default to 1 if size is not provided
+      description: product.description || '',
+      category: product.category || '',
+      stock: product.in_stock ? 10 : 0 // Set default stock
+    }));
+
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching products from Spoonacular', error: err.message });
+  }
+});
+
 
 // Register Route
 app.post('/api/register', async (req, res) => {

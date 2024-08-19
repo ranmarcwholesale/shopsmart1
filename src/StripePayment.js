@@ -2,7 +2,8 @@ import React from 'react';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import './StripePayment.css'; // Import the CSS for styling
-
+import logo from './Components/images/Logo.png';
+import { Link } from 'react-router-dom';
 // Replace with your actual Stripe publishable key
 const stripePromise = loadStripe('pk_test_51PmmeqAsZ3IOytfPLdzPPSAkGAXTbpCubwtOAZbTLnu4zkSTUrwI6tJRTJcU6sOUDi5PsInYSjLAs0cQgnnBGwRb005IqM3PQP');
 
@@ -69,6 +70,10 @@ const CheckoutForm = () => {
   };
 
   return (
+    <div>
+    <Link to='/'>
+    <img className='StripePayment__logo' src={logo} alt='logo'/>
+    </Link>
     <form onSubmit={handleSubmit} className="payment-form">
       <h2>Enter Payment Details</h2>
       {error && <div className="error-message">{error}</div>}
@@ -79,6 +84,7 @@ const CheckoutForm = () => {
       </label>
       <button type="submit" className="submit-button" disabled={!stripe}>Pay</button>
     </form>
+    </div>
   );
 };
 

@@ -1,12 +1,87 @@
+.product {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* Ensure space between elements */
+  max-height: 400px;
+  min-width: 150px; /* Increased min-width for better alignment */
+  padding: 20px;
+  margin: 10px;
+  background-color: white;
+  z-index: 1;
+  flex: 1 1 20%; /* Adjust flex-basis to fit more items per line */
+  box-sizing: border-box;
+  text-align: center; /* Center-align text */
+}
+
+.product img {
+  max-height: 150px;
+  width: 100%;
+  object-fit: contain;
+}
+
+.product__info {
+  height: 80px;
+  margin-bottom: 10px;
+  white-space: normal; /* Allow text to wrap */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Handle long product names */
+}
+
+.product__price {
+  margin-top: 5px;
+}
+
+.product__rating {
+  display: flex; /* Align rating stars horizontally */
+  align-items: center;
+  margin: 10px 0; /* Space above and below the rating */
+}
+
+.product__rating span {
+  color: gold;
+  margin-right: 5px; /* Add space between rating stars */
+}
+
+.product__controls {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.product__addButton, .product__removeButton {
+  margin-top: 10px; /* Adjust margin to fit nicely */
+  background-color: white;
+  border: 1px solid #ddd; /* Add a border for better visibility */
+  cursor: pointer;
+  font-size: 16px;
+  padding: 10px; /* Add padding for a better look */
+}
+
+.product__counter {
+  display: flex;
+  align-items: center;
+  margin: 10px 0; /* Add margin for spacing */
+}
+
+.product__count {
+  margin: 0 10px;
+  font-size: 16px;
+}
+
 .home {
-    display: flex;
-    justify-content: center;
-    margin: 20px;
-  }
-  
-  .home__container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}
+
+.home__container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Increase min-width to 200px */
+  gap: 10px;
+  justify-content: center; /* Center items within the grid */
+  max-width: 100%;
+  box-sizing: border-box;
+}

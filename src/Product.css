@@ -1,60 +1,101 @@
 .product {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    max-height: 400px;
-    min-width: 100px;
-    padding: 20px;
-    margin: 10px;
-    background-color: white;
-    z-index: 1;
-    flex: 1 1 18%;
-    box-sizing: border-box;
-  }
-  
-  .product img {
-    max-height: 150px;
-    width: 100%;
-    object-fit: contain;
-  }
-  
-  .product__info {
-    height: 80px;
-    margin-bottom: 15px;
-  }
-  
-  .product__price {
-    margin-top: 5px;
-  }
-  
-  .product__rating span {
-    color: gold;
-  }
-  
-  .product__controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-  }
-  
-  .product__addButton, .product__removeButton {
-    margin-top: 15px;
-    background-color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .product__counter {
-    display: flex;
-    align-items: center;
-  }
-  
-  .product__count {
-    margin-top: 5px;
-    margin: 0 10px;
-    font-size: 16px;
-  }
-  
+  display: block; /* Use block for better control */
+  width: 220px; /* Slightly increase width */
+  height: 300px; /* Increase height slightly for better spacing */
+  padding: 15px;
+  margin: 10px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-sizing: border-box;
+  text-align: center; /* Center-align text */
+  position: relative; /* Required for absolute positioning of buttons */
+}
+
+.product__image {
+  width: 100%;
+  height: 150px; /* Fixed height for image */
+  object-fit: cover; /* Ensure image fits properly */
+  margin-bottom: 10px;
+}
+
+.product__info {
+  width: 100%;
+}
+
+.product__title {
+  font-size: 14px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.product__price {
+  margin-top: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.product__rating {
+  margin-top: 0px; /* Reduced margin to move rating up */
+  font-size: 16px; /* Adjust font size if needed */
+  color: gold;
+  display: flex; /* Flexbox to align stars horizontally */
+  justify-content: center; /* Center-align stars */
+  align-items: center; /* Center-align stars vertically */
+}
+
+
+.product__rating .full-star {
+  margin-right: 2px; /* Add space between full stars */
+}
+
+.product__rating .half-star {
+  position: relative;
+  margin-left: 2px; /* Space between half star and next full star */
+}
+
+.product__rating .half-star::before {
+  content: '★'; /* Unicode star character */
+  color: gold; /* Full star color */
+  position: absolute;
+  left: 0;
+  width: 50%; /* Half star */
+  overflow: hidden;
+}
+
+.product__controls {
+  position: absolute;
+  bottom: 10px; /* Adjust spacing from bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 10px); /* Full width with some margin */
+}
+
+.product__addButton, .product__removeButton {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 0 5px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.product__counter {
+  display: flex;
+  align-items: center;
+  margin: 0 10px;
+}
+
+.product__count {
+  font-size: 16px;
+  margin: 0 10px;
+}
