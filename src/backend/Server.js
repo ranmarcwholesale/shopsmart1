@@ -21,7 +21,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Replace with your Google Sheet's published CSV URL
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9yTFEyHsOfYjdzQtOriWq0s5EuxhYNrRyqxCYKeTROfW4tMvfPzB84q6f8V2C8Tt-Zmi90lcYKsCS/pub?output=csv';
 
-
 // Endpoint to fetch data from Google Sheets (CSV format)
 app.get('/data', async (req, res) => {
   try {
@@ -137,12 +136,7 @@ app.post('/log-order', async (req, res) => {
 // Serve invoices
 app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
 
-// Catch-all handler to serve the React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../build', 'index.html'));
-});
-
+// Listen on the specified port
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
