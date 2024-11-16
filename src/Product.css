@@ -1,105 +1,58 @@
 .product {
-  display: block;
-  width: 220px;
-  height: 320px; /* Adjust height if needed */
-  padding: 15px;
-  margin: 10px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #fff;
   border-radius: 8px;
-  box-sizing: border-box;
-  text-align: center;
-  position: relative; /* Ensure relative positioning for absolute children */
-  overflow: hidden; /* Prevent overflow issues */
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product--hovered {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .product__image {
   width: 100%;
   height: 150px;
   object-fit: cover;
-  margin-bottom: 10px;
 }
 
 .product__info {
-  width: 100%;
-}
-
-.product__title {
-  font-size: 14px;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 10px;
   text-align: center;
 }
 
-.product__price {
-  margin-top: 5px;
+.product__title {
   font-size: 16px;
-  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.product__price {
+  font-size: 14px;
+  color: #888;
 }
 
 .product__rating {
-  margin-top: 10px; /* Add space above rating */
-  margin-bottom: 50px; /* Ensure space below rating */
-  font-size: 16px;
-  color: gold;
-  display: flex;
-  justify-content: center;
-  align-items: center;
- /* Ensure it stays within container */
-  z-index: 1; /* Make sure it’s above other content if needed */
-}
-
-.product__rating .full-star {
-  margin-right: 2px;
-}
-
-.product__rating .half-star {
-  position: relative;
-  margin-left: 2px;
-}
-
-.product__rating .half-star::before {
-  content: '★';
-  color: gold;
-  position: absolute;
-  left: 0;
-  width: 50%;
-  overflow: hidden;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #ffa41b;
 }
 
 .product__controls {
-  position: absolute;
-  bottom: 15px; /* Spacing from bottom */
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: calc(100% - 10px); /* Ensure it fits within container */
-  z-index: 2; /* Ensure controls are on top of other elements */
+  padding: 10px;
 }
 
-.product__addButton, .product__removeButton {
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  margin: 0 5px;
+.product__addButton {
+  background-color: #f0c14b;
+  border: 1px solid #a88734;
+  color: #111;
   padding: 5px 10px;
-  display: flex;
-  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.product__counter {
-  display: flex;
-  align-items: center;
-  margin: 0 10px;
-}
-
-.product__count {
-  font-size: 16px;
-  margin: 0 10px;
+.product__addButton:hover {
+  background-color: #ddb347;
 }

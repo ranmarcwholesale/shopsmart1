@@ -1,0 +1,41 @@
+.shopping-list {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Enhanced shadow for depth */
+}
+
+.shopping-list h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #333;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle text shadow */
+}
+
+.shopping-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.shopping-list li {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    color: #495057;
+    display: flex;
+    justify-content: space-between; /* Align quantity and item name */
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.shopping-list li:hover {
+    background-color: #f8f9fa; /* Slight background change on hover */
+}
+
+.shopping-list li:last-child {
+    border-bottom: none; /* Remove border for the last item */
+}
+
+.shopping-list li span.quantity {
+    font-weight: bold;
+    color: #ff7e5f; /* Coral color for emphasis */
+}

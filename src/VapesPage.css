@@ -1,0 +1,96 @@
+/* VapesPage.css */
+.vapesPage {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .backButton {
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .backButton:hover {
+    background-color: #0056b3;
+  }
+  
+  .vapesPage__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .vapesPage__option {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    flex: 1 1 calc(33.333% - 20px);
+    min-width: 200px;
+    max-width: 400px;
+    border-radius: 8px;
+    transition: transform 0.3s;
+  }
+  
+  .vapesPage__option:hover {
+    transform: scale(1.05);
+  }
+  
+  .vapesPage__optionImage {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  .vapesPage__optionOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 8px;
+  }
+  
+  .vapesPage__option:hover .vapesPage__optionOverlay {
+    opacity: 1;
+  }
+  
+  .vapesPage__optionName {
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .vapesPage__option {
+      flex: 1 1 calc(50% - 20px);
+    }
+  
+    .vapesPage__optionName {
+      font-size: 18px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .vapesPage__option {
+      flex: 1 1 100%;
+    }
+  
+    .vapesPage__optionName {
+      font-size: 16px;
+    }
+  }
+  

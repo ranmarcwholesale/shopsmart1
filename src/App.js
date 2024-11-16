@@ -3,122 +3,68 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './Header';
 import Home from './Home';
 import Checkout from './Checkout';
-import Login from './Login';
-import Register from './Register';
-import Payment from './Payment'; // Import the Payment component
-import StripePayment from './StripePayment'; // Import the new StripePayment component
-import SidePanel from './SidePanel';
-import './App.css';
+import CustomerDetails from './CustomerDetails'; // Import the CustomerDetails page
+import Invoice from './invoice'; // Ensure this path is correct
 
 function App() {
   const [basket, setBasket] = useState([]);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [user, setUser] = useState(null); // Add user state
+  const [customerInfo, setCustomerInfo] = useState(null); // Store customer information
 
-  const handleAddToBasket = (product) => {
-    setBasket((prevBasket) => {
-      const index = prevBasket.findIndex((item) => item.id === product.id);
-      if (index >= 0) {
-        const updatedBasket = prevBasket.map((item, idx) =>
-          idx === index ? { ...item, quantity: item.quantity + 1 } : item
-        );
-        return updatedBasket;
+  const handleAddToBasket = (index, puffCount, flavor, quantity) => {
+    const existingProduct = basket.find(item => item.index === index && item.puffCount === puffCount && item.flavor === flavor);
+
+    if (existingProduct) {
+      // Increment quantity
+      setBasket(basket.map(item =>
+        item.index === index && item.puffCount === puffCount && item.flavor === flavor
+          ? { ...item, quantity: item.quantity + quantity }
+          : item
+      ));
+    } else {
+      // Add new product to basket
+      setBasket([...basket, { index, puffCount, flavor, quantity }]);
+    }
+  };
+
+  const handleRemoveFromBasket = (index, puffCount, flavor, quantity) => {
+    const existingProduct = basket.find(item => item.index === index && item.puffCount === puffCount && item.flavor === flavor);
+
+    if (existingProduct) {
+      if (existingProduct.quantity > quantity) {
+        // Decrement quantity
+        setBasket(basket.map(item =>
+          item.index === index && item.puffCount === puffCount && item.flavor === flavor
+            ? { ...item, quantity: item.quantity - quantity }
+            : item
+        ));
       } else {
-        return [...prevBasket, { ...product, quantity: 1 }];
+        // Remove product if quantity reaches 0
+        setBasket(basket.filter(item => !(item.index === index && item.puffCount === puffCount && item.flavor === flavor)));
       }
-    });
-  };
-
-  const handleRemoveFromBasket = (product) => {
-    setBasket((prevBasket) => {
-      const index = prevBasket.findIndex((item) => item.id === product.id);
-      if (index >= 0) {
-        const updatedBasket = prevBasket
-          .map((item, idx) =>
-            idx === index ? { ...item, quantity: item.quantity - 1 } : item
-          )
-          .filter((item) => item.quantity > 0);
-        return updatedBasket;
-      }
-      return prevBasket;
-    });
-  };
-
-  const handleMenuClick = () => {
-    setIsPanelOpen(true);
-  };
-
-  const handleClosePanel = () => {
-    setIsPanelOpen(false);
+    }
   };
 
   return (
     <Router>
-      <div className="App">
-        <Routes>
-          <Route
-            path='/login'
-            element={<Login setUser={setUser} />} // Pass setUser function to Login
-          />
-          <Route
-            path='/checkout'
-            element={
-              <>
-                <Header
-                  basketCount={basket.reduce((count, item) => count + item.quantity, 0)}
-                  onMenuClick={handleMenuClick}
-                  user={user} // Pass user state to Header
-                />
-                {isPanelOpen && (
-                  <div className="overlay" onClick={handleClosePanel}>
-                    <SidePanel onClose={handleClosePanel} />
-                  </div>
-                )}
-                <Checkout
-                  basket={basket}
-                  onAddToBasket={handleAddToBasket}
-                  onRemoveFromBasket={handleRemoveFromBasket}
-                  user={user} // Pass user state to Checkout
-                />
-              </>
-            }
-          />
-          <Route
-            path='/register'
-            element={<Register />}
-          />
-          <Route
-            path='/payment'
-            element={<Payment user={user} basket={basket} />} // Add the payment route
-          />
-          <Route
-            path='/stripe-payment'
-            element={<StripePayment />} // Add the StripePayment route
-          />
-          <Route
-            path='/'
-            element={
-              <>
-                <Header
-                  basketCount={basket.reduce((count, item) => count + item.quantity, 0)}
-                  onMenuClick={handleMenuClick}
-                  user={user} // Pass user state to Header
-                />
-                {isPanelOpen && (
-                  <div className="overlay" onClick={handleClosePanel}>
-                    <SidePanel onClose={handleClosePanel} />
-                  </div>
-                )}
-                <Home
-                  onAddToBasket={handleAddToBasket}
-                  onRemoveFromBasket={handleRemoveFromBasket}
-                  basket={basket}
-                />
-              </>
-            }
-          />
-        </Routes>
-      </div>
+      <Header basketCount={basket.length} />
+      <Routes>
+        <Route path="/" element={<Home onAddToBasket={handleAddToBasket} />} />
+        
+        <Route
+          path="/checkout"
+          element={<Checkout basket={basket} onAddToBasket={handleAddToBasket} onRemoveFromBasket={handleRemoveFromBasket} />}
+        />
+        
+        <Route
+          path="/customer-details"
+          element={<CustomerDetails basket={basket} setCustomerInfo={setCustomerInfo} />}
+        />
+        
+        <Route
+          path="/invoice"
+          element={<Invoice basket={basket} customerInfo={customerInfo} />}
+        />
+      </Routes>
     </Router>
   );
 }

@@ -1,106 +1,142 @@
-/* src/Checkout.css */
-
 .checkout {
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  box-sizing: border-box;
+  background: linear-gradient(135deg, #1A1A1A, #101010); /* Darker background */
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+  color: #fff;
 }
 
 .checkout__left {
-  flex: 0.7;
-  padding-right: 20px;
+  width: 65%;
+  padding: 20px;
 }
 
 .checkout__title {
-  font-size: 28px;
-  font-weight: 400;
-  margin-bottom: 10px;
-  border-bottom: 1px solid lightgray;
-}
-
-.checkout__ad {
-  width: 100%;
-  max-width: 100%;
-  align-self: center;
-  margin: 20px 0;
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 20px;
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 3px solid #ff6347;
+  padding-bottom: 10px;
 }
 
 .checkout__products {
-  margin-top: 20px;
-}
-
-.checkout__product {
   display: flex;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.checkout__product img {
+.checkout__productCard {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08); /* Semi-transparent for glass effect */
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease;
+}
+
+.checkout__productCard:hover {
+  transform: scale(1.03);
+}
+
+.checkout__productImage {
+  width: 150px;
+  height: 150px;
   object-fit: contain;
-  width: 180px;
-  height: 180px;
+  margin-right: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.6);
 }
 
 .checkout__productInfo {
-  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.checkout__productPrice {
-  margin-top: 10px;
+.checkout__productBrand {
+  font-size: 1.6rem;
+  color: #fff;
+  font-weight: bold;
 }
 
-.checkout__productRating span {
-  color: #f0c14b;
+.checkout__productFlavor, 
+.checkout__productPuffs {
+  font-size: 1rem;
+  color: #ccc;
 }
 
-.checkout__productControls {
+.checkout__quantityControls {
   display: flex;
   align-items: center;
+  gap: 10px;
   margin-top: 10px;
 }
 
-.checkout__productControls button {
-  background-color: #f0c14b;
+.quantityControl__btn {
+  background-color: #ff6347;
   border: none;
-  padding: 5px;
+  color: white;
+  font-size: 1.2rem;
+  padding: 10px;
+  border-radius: 50%;
   cursor: pointer;
-  margin-right: 10px;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.quantityControl__btn:hover {
+  background-color: #ff4500;
+  transform: scale(1.1);
+}
+
+.quantityControl__quantity {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #fff;
 }
 
 .checkout__right {
-  flex: 0.3;
+  width: 30%;
+  position: sticky;
+  top: 20px;
   padding: 20px;
-  background-color: white;
-  border: 1px solid lightgray;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visibility */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Align to the start of the container */
+  background: rgba(255, 255, 255, 0.1); /* Semi-transparent for glass effect */
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  color: #fff;
 }
 
 .checkout__summary {
-  width: 100%;
-  margin-bottom: 20px; /* Space between summary and button */
+  text-align: center;
 }
 
-.checkout__summaryItem {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-
-.checkout__summaryItem span:first-child {
-  font-weight: 500;
+.checkout__summary h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #fff;
+  font-weight: bold;
 }
 
 .proceed-btn {
-  background-color: #f0c14b;
+  width: 100%;
+  padding: 15px;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, #28a745, #218838); /* Gradient button */
   border: none;
-  padding: 10px 20px;
+  color: white;
   cursor: pointer;
-  width: 100%; /* Full width button */
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 4px; /* Optional: Add rounded corners */
+  border-radius: 10px;
+  transition: background-color 0.3s ease, transform 0.2s;
+  font-weight: bold;
+}
+
+.proceed-btn:hover {
+  background-color: #1e7e34;
+  transform: scale(1.05);
 }

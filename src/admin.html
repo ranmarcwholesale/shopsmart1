@@ -1,0 +1,147 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard - Orders</title>
+  <link rel="stylesheet" type="text/css" href="admin.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <h1>Admin Dashboard - Orders</h1>
+  <div class="filters">
+    <button id="showAll">Show All Orders</button>
+    <button id="showUnpaid">Show Unpaid Orders</button>
+  </div>
+  <div id="ordersContainer"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const ordersContainer = document.getElementById('ordersContainer');
+      const showAllBtn = document.getElementById('showAll');
+      const showUnpaidBtn = document.getElementById('showUnpaid');
+
+      let orders = [];
+
+      const fetchOrders = async () => {
+        try {
+          const response = await fetch('/admin/get-orders');
+          orders = await response.json();
+          displayOrders(orders);
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+          ordersContainer.innerHTML = '<p>Error fetching orders.</p>';
+        }
+      };
+
+      const displayOrders = (ordersToDisplay) => {
+        ordersContainer.innerHTML = '';
+        if (ordersToDisplay.length === 0) {
+          ordersContainer.innerHTML = '<p>No orders found.</p>';
+          return;
+        }
+
+        ordersToDisplay.forEach((order) => {
+          const orderDiv = document.createElement('div');
+          orderDiv.className = 'order-section';
+          orderDiv.innerHTML = `
+            <div class="order-header">
+              <strong>Date and Time:</strong> ${order.dateTime}<br>
+              <strong>Name:</strong> ${order.customerInfo.name}<br>
+              <strong>Store Name:</strong> ${order.customerInfo.storeName}<br>
+              <strong>Address:</strong> ${order.customerInfo.storeAddress}<br>
+              <strong>Phone Number:</strong> ${order.customerInfo.phoneNumber}<br>
+              ${
+                order.invoiceLink
+                  ? `<strong>Invoice:</strong> <a href="${order.invoiceLink}" target="_blank">View Invoice</a><br>`
+                  : ''
+              }
+              <strong>Payment Received:</strong>
+              <input type="checkbox" data-order-id="${order.id}" class="payment-checkbox" ${
+            order.paymentReceived ? 'checked' : ''
+          }>
+            </div>
+            <div class="order-details">
+              <h3>Items:</h3>
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Puffs</th>
+                    <th>Flavor</th>
+                    <th>Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${order.basket
+                    .map(
+                      (item) => `
+                      <tr>
+                        <td>${item.index[0] || ''}</td>
+                        <td>${item.index[1] || ''}</td>
+                        <td>${item.index[2] || ''}</td>
+                        <td>${item.index[3] || ''}</td>
+                      </tr>
+                    `
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+          ordersContainer.appendChild(orderDiv);
+        });
+
+        // Add event listeners to payment checkboxes
+        const paymentCheckboxes = document.querySelectorAll('.payment-checkbox');
+        paymentCheckboxes.forEach((checkbox) => {
+          checkbox.addEventListener('change', handlePaymentStatusChange);
+        });
+      };
+
+      const handlePaymentStatusChange = async (event) => {
+        const orderId = parseInt(event.target.getAttribute('data-order-id'));
+        const paymentReceived = event.target.checked;
+
+        try {
+          const response = await fetch('/admin/update-payment-status', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId, paymentReceived }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to update payment status');
+          }
+
+          // Update the local orders array
+          const orderIndex = orders.findIndex((order) => order.id === orderId);
+          if (orderIndex !== -1) {
+            orders[orderIndex].paymentReceived = paymentReceived;
+          }
+
+          // Optionally, you can show a success message
+          // alert('Payment status updated successfully');
+        } catch (error) {
+          console.error('Error updating payment status:', error);
+          alert('Failed to update payment status.');
+          // Revert the checkbox state
+          event.target.checked = !paymentReceived;
+        }
+      };
+
+      showAllBtn.addEventListener('click', () => {
+        displayOrders(orders);
+      });
+
+      showUnpaidBtn.addEventListener('click', () => {
+        const unpaidOrders = orders.filter((order) => !order.paymentReceived);
+        displayOrders(unpaidOrders);
+      });
+
+      fetchOrders();
+    });
+  </script>
+</body>
+</html>
