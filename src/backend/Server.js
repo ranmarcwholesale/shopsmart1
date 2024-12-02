@@ -119,7 +119,7 @@ app.post('/log-order', async (req, res) => {
     `;
 
     const mailOptions = {
-      from: 'your-email@gmail.com',
+      from: 'ranmarcwholesale@gmail.com',
       to: wholesalerEmail,
       subject: emailSubject,
       html: emailBody,
