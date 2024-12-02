@@ -140,3 +140,82 @@
   background-color: #1e7e34;
   transform: scale(1.05);
 }
+/* General responsive layout for screens smaller than 768px */
+@media (max-width: 768px) {
+  .checkout {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .checkout__left, .checkout__right {
+    width: 100%;
+  }
+
+  .checkout__title {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .checkout__productCard {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .checkout__productImage {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 15px;
+  }
+
+  .checkout__productInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .checkout__quantityControls {
+    justify-content: center;
+  }
+
+  .proceed-btn {
+    font-size: 1rem;
+    padding: 12px;
+    width: 100%;
+  }
+}
+
+/* For very small screens (up to 480px) */
+@media (max-width: 480px) {
+  .checkout__title {
+    font-size: 1.8rem;
+  }
+
+  .checkout__productBrand {
+    font-size: 1.2rem;
+  }
+
+  .checkout__productFlavor, .checkout__productPuffs {
+    font-size: 0.9rem;
+  }
+
+  .quantityControl__quantity {
+    font-size: 1.2rem;
+  }
+}
+.empty-cart-btn {
+  background-color: #ff4d4d;
+  color: white;
+  font-size: 1rem;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.empty-cart-btn:hover {
+  background-color: #e60000;
+}
+
