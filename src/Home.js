@@ -49,7 +49,7 @@ function Home({ onAddToBasket, searchQuery }) {
 
   const fetchProductData = async () => {
     try {
-      const response = await fetch('https://shopsmart1.onrender.com');
+      const response = await fetch('https://shopsmart1.onrender.com/data');
       if (!response.ok) {
         throw new Error(`Failed to fetch data: ${response.statusText}`);
       }
