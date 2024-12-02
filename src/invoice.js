@@ -1,5 +1,4 @@
-// Invoice.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './Invoice.css';
 import logo from './Components/images/Logo.png';
@@ -7,56 +6,36 @@ import logo from './Components/images/Logo.png';
 const Invoice = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
   const { customerInfo, basket } = location.state || {};
 
   useEffect(() => {
     if (!customerInfo || !basket) {
       navigate('/customer-details');
-      return;
     }
-
-    const invoiceHTML = generateInvoiceHTML();
-    /*
-    const sendDataToServer = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/log-order', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ customerInfo, basket, invoiceHTML }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to log order');
-        }
-
-        await response.text();
-      } catch (error) {
-        console.error('Error sending data to server:', error);
-        alert('There was an error processing your order.');
-      }
-    };
-
-    sendDataToServer();
   }, [customerInfo, basket, navigate]);
- */
-  const generateInvoiceHTML = () => {
-    const itemsHTML = basket
-      .map(
-        (item) => `
-          <tr>
-            <td>${item.index.brand || ''}</td>
-            <td>${item.index.flavor || ''}</td>
-            <td>${item.index.puffs || ''}</td>
-            <td>${item.index.quantity || ''}</td>
-          </tr>
-        `
-      )
+
+  const handleDownload = () => {
+    const allKeys = [
+      ...new Set(basket.flatMap((item) => Object.keys(item))).filter(
+        (key) => key !== 'image'
+      ),
+    ];
+
+    const headers = allKeys
+      .map((key) => `<th>${key.charAt(0).toUpperCase() + key.slice(1)}</th>`)
       .join('');
 
-    const logoBase64 = getBase64Logo();
+    const itemsHTML = basket
+      .map((item) => {
+        const itemDetails = allKeys
+          .map(
+            (key) =>
+              `<td>${item[key] !== undefined && item[key] !== null ? item[key] : 'N/A'}</td>`
+          )
+          .join('');
+        return `<tr>${itemDetails}</tr>`;
+      })
+      .join('');
 
     const invoiceHTML = `
       <!DOCTYPE html>
@@ -64,78 +43,43 @@ const Invoice = () => {
       <head>
         <title>Invoice</title>
         <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-          }
-          .invoice-logo-container {
-            text-align: center;
-            margin-bottom: 20px;
-          }
-          .invoice-logo {
-            max-width: 200px;
-            height: auto;
-          }
-          h1, h2 {
-            text-align: center;
-          }
-          h3 {
-            margin-top: 40px;
-          }
-          p {
-            font-size: 16px;
-            margin: 5px 0;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-          }
-          th, td {
-            border: 1px solid #dddddd;
-            padding: 8px;
-            text-align: left;
-          }
-          th {
-            background-color: #f2f2f2;
-          }
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .invoice-logo-container { text-align: center; margin-bottom: 20px; }
+          .invoice-logo { max-width: 200px; height: auto; }
+          h1, h2 { text-align: center; }
+          h3 { margin-top: 40px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
+          th { background-color: #007BFF; color: white; font-weight: bold; }
         </style>
       </head>
       <body>
         <div class="invoice-logo-container">
-          <img src="${logoBase64}" alt="Ranmarc Wholesale Logo" class="invoice-logo" />
+          <img src="${logo}" alt="Ranmarc Wholesale Logo" class="invoice-logo" />
         </div>
         <h1>Ranmarc Wholesale</h1>
         <h2>Invoice</h2>
-        <p><strong>Customer:</strong> ${customerInfo.name || 'N/A'}</p>
-        <p><strong>Store:</strong> ${customerInfo.storeName || 'N/A'}</p>
-        <p><strong>Phone:</strong> ${customerInfo.phoneNumber || 'N/A'}</p>
-        <p><strong>Address:</strong> ${customerInfo.storeAddress || 'N/A'}</p>
+        <p><strong>Customer:</strong> ${customerInfo?.name || 'N/A'}</p>
+        <p><strong>Store:</strong> ${customerInfo?.storeName || 'N/A'}</p>
+        <p><strong>Phone:</strong> ${customerInfo?.phoneNumber || 'N/A'}</p>
+        <p><strong>Address:</strong> ${customerInfo?.storeAddress || 'N/A'}</p>
         <hr />
         <h3>Order Details</h3>
         <table>
           <thead>
-            <tr>
-              <th>Product</th>
-              <th>Flavor</th>
-              <th>Puffs</th>
-              <th>Quantity</th>
-            </tr>
+            <tr>${headers}</tr>
           </thead>
-          <tbody>
-            ${itemsHTML}
-          </tbody>
+          <tbody>${itemsHTML}</tbody>
         </table>
       </body>
       </html>
     `;
-    return invoiceHTML;
-  };
 
-  const getBase64Logo = () => {
-    // Convert the logo image to Base64
-    const logoBase64String = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...'; // Replace with your actual Base64 string
-    return logoBase64String;
+    const blob = new Blob([invoiceHTML], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'Invoice.html';
+    link.click();
   };
 
   return (
@@ -159,26 +103,37 @@ const Invoice = () => {
       </p>
       <hr />
       <h3>Order Details</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Flavor</th>
-            <th>Puffs</th>
-            <th>Quantity</th>
-          </tr>
-        </thead>
-        <tbody>
-          {basket.map((item, index) => (
-            <tr key={index}>
-              <td>{item.index.brand || ''}</td>
-              <td>{item.index.flavor || ''}</td>
-              <td>{item.index.puffs || ''}</td>
-              <td>{item.index.quantity || ''}</td>
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              {[...new Set(basket.flatMap((item) => Object.keys(item)))]
+                .filter((key) => key !== 'image')
+                .map((key) => (
+                  <th key={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</th>
+                ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {basket.map((item, index) => (
+              <tr key={index}>
+                {[...new Set(basket.flatMap((item) => Object.keys(item)))]
+                  .filter((key) => key !== 'image')
+                  .map((key) => (
+                    <td key={key}>
+                      {item[key] !== undefined && item[key] !== null
+                        ? item[key]
+                        : 'N/A'}
+                    </td>
+                  ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <button onClick={handleDownload} className="download-btn">
+        Download Invoice
+      </button>
     </div>
   );
 };
