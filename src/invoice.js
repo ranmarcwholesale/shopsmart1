@@ -17,7 +17,7 @@ const Invoice = () => {
     }
 
     const invoiceHTML = generateInvoiceHTML();
-
+    /*
     const sendDataToServer = async () => {
       try {
         const response = await fetch('http://localhost:5000/log-order', {
@@ -41,7 +41,7 @@ const Invoice = () => {
 
     sendDataToServer();
   }, [customerInfo, basket, navigate]);
-
+ */
   const generateInvoiceHTML = () => {
     const itemsHTML = basket
       .map(
