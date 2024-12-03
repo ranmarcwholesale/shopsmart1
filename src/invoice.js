@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import './Invoice.css'; // Import the CSS file for styling
 
 const Invoice = () => {
   const location = useLocation();
@@ -78,26 +79,34 @@ const Invoice = () => {
         body: JSON.stringify({ customerInfo, basket, invoiceHTML }),
       });
 
-      if (!response.ok) throw new Error('Failed to log order');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to log order');
+      }
 
       const data = await response.json();
-      setInvoiceUrl(data.invoiceUrl); // Set the invoice URL for client viewing
+      setInvoiceUrl(data.invoiceUrl);
     } catch (error) {
       console.error('Error logging order:', error);
-      alert('Error sending data to server.');
+      alert('Error sending data to server: ' + error.message);
     }
   };
 
   return (
-    <div>
+    <div className="invoice">
       <h1>Invoice Processing</h1>
       {invoiceUrl ? (
-        <p>
-          You can view your invoice here:{' '}
-          <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">
-            {invoiceUrl}
-          </a>
-        </p>
+        <>
+          <p>
+            You can view your invoice here:{' '}
+            <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">
+              {invoiceUrl}
+            </a>
+          </p>
+          <button className="invoice__homeButton" onClick={() => navigate('/')}>
+            Go Back to Home
+          </button>
+        </>
       ) : (
         <p>Your invoice is being generated...</p>
       )}
