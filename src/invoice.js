@@ -1,3 +1,5 @@
+// Invoice.js
+
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -21,6 +23,7 @@ const Invoice = () => {
     const headers = `
       <tr>
         <th>Brand</th>
+        <th>Type</th>
         <th>Flavor</th>
         <th>Puffs</th>
         <th>Quantity</th>
@@ -30,10 +33,11 @@ const Invoice = () => {
       .map(
         (item) => `
           <tr>
-            <td>${item.index.brand || 'N/A'}</td>
-            <td>${item.index.flavor || 'N/A'}</td>
-            <td>${item.index.puffs || 'N/A'}</td>
-            <td>${item.index.quantity || 'N/A'}</td>
+            <td>${item.brand || 'N/A'}</td>
+            <td>${item.type || 'N/A'}</td>
+            <td>${item.flavor || 'N/A'}</td>
+            <td>${item.puffs || 'N/A'}</td>
+            <td>${item.quantity || 'N/A'}</td>
           </tr>`
       )
       .join('');
@@ -68,7 +72,7 @@ const Invoice = () => {
 
   const sendDataToServer = async (customerInfo, basket, invoiceHTML) => {
     try {
-      const response = await fetch('https://shopsmart1.onrender.com/log-order', {
+      const response = await fetch('http://localhost:5000/log-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerInfo, basket, invoiceHTML }),
@@ -87,10 +91,15 @@ const Invoice = () => {
   return (
     <div>
       <h1>Invoice Processing</h1>
-      {invoiceUrl && (
+      {invoiceUrl ? (
         <p>
-          You can view your invoice here: <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">{invoiceUrl}</a>
+          You can view your invoice here:{' '}
+          <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">
+            {invoiceUrl}
+          </a>
         </p>
+      ) : (
+        <p>Your invoice is being generated...</p>
       )}
     </div>
   );
