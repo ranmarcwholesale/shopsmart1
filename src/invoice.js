@@ -72,7 +72,7 @@ const Invoice = () => {
 
   const sendDataToServer = async (customerInfo, basket, invoiceHTML) => {
     try {
-      const response = await fetch('https://shopsmart1.onrender.com/log-order', {
+      const response = await fetch('/log-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerInfo, basket, invoiceHTML }),
