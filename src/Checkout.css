@@ -204,18 +204,16 @@
   }
 }
 .empty-cart-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
   background-color: #ff4d4d;
   color: white;
-  font-size: 1rem;
-  padding: 10px 20px;
-  margin-top: 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-size: 16px;
 }
 
 .empty-cart-btn:hover {
   background-color: #e60000;
 }
-
