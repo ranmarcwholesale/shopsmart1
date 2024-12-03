@@ -1,8 +1,10 @@
+// Checkout.js
+
 import React, { useState, useEffect } from 'react';
 import './Checkout.css';
 import { useNavigate } from 'react-router-dom';
 
-const Checkout = ({ basket, setBasket = () => {} }) => {
+const Checkout = ({ basket, setBasket }) => {
   const navigate = useNavigate();
   const [basketState, setBasketState] = useState(basket);
 
@@ -14,7 +16,7 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
   const calculateSubtotal = () => {
     return basketState
       .reduce((total, item) => {
-        const itemTotal = item.price ? item.price * item.index.quantity : 0;
+        const itemTotal = item.price ? item.price * item.quantity : 0;
         return total + itemTotal;
       }, 0)
       .toFixed(2);
@@ -27,14 +29,17 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
 
   const handleEmptyCart = () => {
     setBasketState([]);
-    setBasket([]);
+    setBasket([]); // This updates the parent component's basket
     console.log('Cart emptied');
   };
 
   const incrementQuantity = (item) => {
     const updatedBasket = basketState.map((basketItem) =>
       basketItem === item
-        ? { ...basketItem, index: { ...basketItem.index, quantity: basketItem.index.quantity + 1 } }
+        ? {
+            ...basketItem,
+            quantity: basketItem.quantity + 1,
+          }
         : basketItem
     );
     setBasketState(updatedBasket);
@@ -43,10 +48,13 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
   };
 
   const decrementQuantity = (item) => {
-    if (item.index.quantity > 1) {
+    if (item.quantity > 1) {
       const updatedBasket = basketState.map((basketItem) =>
         basketItem === item
-          ? { ...basketItem, index: { ...basketItem.index, quantity: basketItem.index.quantity - 1 } }
+          ? {
+              ...basketItem,
+              quantity: basketItem.quantity - 1,
+            }
           : basketItem
       );
       setBasketState(updatedBasket);
@@ -63,12 +71,14 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
           <div className="checkout__products">
             {basketState.map((item, index) => (
               <div
-                key={`${item.index.brand || 'Unknown'}-${item.index.puffs || '0'}-${item.index.flavor || 'Unknown'}-${index}`}
+                key={`${item.brand || 'Unknown'}-${
+                  item.puffs || '0'
+                }-${item.flavor || 'Unknown'}-${index}`}
                 className="checkout__productCard"
               >
                 <img
-                  src={item.index.image || '/images/placeholder.png'}
-                  alt={item.index.brand || 'No brand available'}
+                  src={item.image || '/images/placeholder.png'}
+                  alt={item.brand || 'No brand available'}
                   className="checkout__productImage"
                   onError={(e) => {
                     e.target.onerror = null;
@@ -76,9 +86,22 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
                   }}
                 />
                 <div className="checkout__productInfo">
-                  <h2 className="checkout__productBrand">{item.index.brand || 'No brand available'}</h2>
-                  <p className="checkout__productFlavor">Flavor: {item.index.flavor || 'N/A'}</p>
-                  <p className="checkout__productPuffs">Puffs: {item.index.puffs || 'N/A'}</p>
+                  <h2 className="checkout__productBrand">
+                    {item.brand || 'No brand available'}
+                  </h2>
+                  {item.type && (
+                    <p className="checkout__productType">
+                      Type: {item.type}
+                    </p>
+                  )}
+                  <p className="checkout__productFlavor">
+                    Flavor: {item.flavor || 'N/A'}
+                  </p>
+                  {item.puffs && (
+                    <p className="checkout__productPuffs">
+                      Puffs: {item.puffs}
+                    </p>
+                  )}
                   {item.price && (
                     <p className="checkout__productPrice">
                       Price: ${item.price.toFixed(2)}
@@ -88,12 +111,12 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
                     <button
                       className="quantityControl__btn decrement"
                       onClick={() => decrementQuantity(item)}
-                      disabled={item.index.quantity <= 1}
+                      disabled={item.quantity <= 1}
                     >
                       -
                     </button>
                     <span className="quantityControl__quantity">
-                      {item.index.quantity}
+                      {item.quantity}
                     </span>
                     <button
                       className="quantityControl__btn increment"
@@ -119,7 +142,7 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
       <div className="checkout__right">
         <div className="checkout__summary">
           <h2>Order Summary</h2>
-          {basketState.some(item => item.price) && (
+          {basketState.some((item) => item.price) && (
             <p>Subtotal: ${calculateSubtotal()}</p>
           )}
           <button onClick={handleProceedToCheckout} className="proceed-btn">
