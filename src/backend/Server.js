@@ -1,3 +1,5 @@
+// server.js
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -66,6 +68,12 @@ app.get('/data', async (req, res) => {
 app.post('/log-order', async (req, res) => {
   const { customerInfo, basket, invoiceHTML } = req.body;
 
+  // Validate incoming data
+  if (!customerInfo || !basket || !invoiceHTML) {
+    console.error('Invalid request data:', req.body);
+    return res.status(400).send('Invalid request data');
+  }
+
   // Generate a hash of the order data to detect duplicates
   const orderDataString = JSON.stringify({ customerInfo, basket });
   const orderHash = crypto.createHash('sha256').update(orderDataString).digest('hex');
@@ -133,7 +141,7 @@ app.post('/log-order', async (req, res) => {
       service: 'gmail',
       auth: {
         user: 'ranmarcwholesale@gmail.com', // Your email
-        pass: 'tqye sqdk wkwp eapq', // Your app-specific password
+        pass: 'tqye sqdk wkwp eapq', // Replace with your email password
       },
       tls: {
         rejectUnauthorized: false,
@@ -141,8 +149,15 @@ app.post('/log-order', async (req, res) => {
     });
 
     const wholesalerEmail = 'ranmarcwholesale@gmail.com'; // Replace with your desired recipient email
+
+    // Update product details mapping to match the new data structure
     const productDetails = basket
-      .map((item) => `${item.index.brand} - ${item.index.flavor} (Puffs: ${item.index.puffs}, Quantity: ${item.index.quantity})`)
+      .map(
+        (item) =>
+          `${item.brand} - ${item.flavor} ${
+            item.type ? `(Type: ${item.type})` : ''
+          } ${item.puffs ? `(Puffs: ${item.puffs})` : ''}, Quantity: ${item.quantity}`
+      )
       .join('; ');
 
     const emailSubject = `New Order Received - Order ID ${orderId}`;
