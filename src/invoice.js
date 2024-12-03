@@ -1,139 +1,97 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './Invoice.css';
-import logo from './Components/images/Logo.png';
 
 const Invoice = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { customerInfo, basket } = location.state || {};
+  const [invoiceUrl, setInvoiceUrl] = useState('');
 
   useEffect(() => {
-    if (!customerInfo || !basket) {
+    if (!customerInfo || !basket || !Array.isArray(basket)) {
+      console.error('Invalid or missing data:', { customerInfo, basket });
       navigate('/customer-details');
+    } else {
+      const html = generateInvoiceHTML();
+      sendDataToServer(customerInfo, basket, html);
     }
   }, [customerInfo, basket, navigate]);
 
-  const handleDownload = () => {
-    const allKeys = [
-      ...new Set(basket.flatMap((item) => Object.keys(item))).filter(
-        (key) => key !== 'image'
-      ),
-    ];
+  const generateInvoiceHTML = () => {
+    const headers = `
+      <tr>
+        <th>Brand</th>
+        <th>Flavor</th>
+        <th>Puffs</th>
+        <th>Quantity</th>
+      </tr>`;
 
-    const headers = allKeys
-      .map((key) => `<th>${key.charAt(0).toUpperCase() + key.slice(1)}</th>`)
+    const rows = basket
+      .map(
+        (item) => `
+          <tr>
+            <td>${item.index.brand || 'N/A'}</td>
+            <td>${item.index.flavor || 'N/A'}</td>
+            <td>${item.index.puffs || 'N/A'}</td>
+            <td>${item.index.quantity || 'N/A'}</td>
+          </tr>`
+      )
       .join('');
 
-    const itemsHTML = basket
-      .map((item) => {
-        const itemDetails = allKeys
-          .map(
-            (key) =>
-              `<td>${item[key] !== undefined && item[key] !== null ? item[key] : 'N/A'}</td>`
-          )
-          .join('');
-        return `<tr>${itemDetails}</tr>`;
-      })
-      .join('');
-
-    const invoiceHTML = `
+    return `
       <!DOCTYPE html>
       <html>
       <head>
         <title>Invoice</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
-          .invoice-logo-container { text-align: center; margin-bottom: 20px; }
-          .invoice-logo { max-width: 200px; height: auto; }
           h1, h2 { text-align: center; }
-          h3 { margin-top: 40px; }
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
-          th { background-color: #007BFF; color: white; font-weight: bold; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
         </style>
       </head>
       <body>
-        <div class="invoice-logo-container">
-          <img src="${logo}" alt="Ranmarc Wholesale Logo" class="invoice-logo" />
-        </div>
         <h1>Ranmarc Wholesale</h1>
         <h2>Invoice</h2>
-        <p><strong>Customer:</strong> ${customerInfo?.name || 'N/A'}</p>
-        <p><strong>Store:</strong> ${customerInfo?.storeName || 'N/A'}</p>
-        <p><strong>Phone:</strong> ${customerInfo?.phoneNumber || 'N/A'}</p>
-        <p><strong>Address:</strong> ${customerInfo?.storeAddress || 'N/A'}</p>
-        <hr />
-        <h3>Order Details</h3>
+        <p><strong>Customer Name:</strong> ${customerInfo.name}</p>
+        <p><strong>Store Name:</strong> ${customerInfo.storeName}</p>
+        <p><strong>Phone Number:</strong> ${customerInfo.phoneNumber}</p>
+        <p><strong>Address:</strong> ${customerInfo.storeAddress}</p>
         <table>
-          <thead>
-            <tr>${headers}</tr>
-          </thead>
-          <tbody>${itemsHTML}</tbody>
+          <thead>${headers}</thead>
+          <tbody>${rows}</tbody>
         </table>
       </body>
-      </html>
-    `;
+      </html>`;
+  };
 
-    const blob = new Blob([invoiceHTML], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'Invoice.html';
-    link.click();
+  const sendDataToServer = async (customerInfo, basket, invoiceHTML) => {
+    try {
+      const response = await fetch('http://localhost:5000/log-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerInfo, basket, invoiceHTML }),
+      });
+
+      if (!response.ok) throw new Error('Failed to log order');
+
+      const data = await response.json();
+      setInvoiceUrl(data.invoiceUrl); // Set the invoice URL for client viewing
+    } catch (error) {
+      console.error('Error logging order:', error);
+      alert('Error sending data to server.');
+    }
   };
 
   return (
-    <div className="invoice">
-      <div className="invoice-logo-container">
-        <img src={logo} alt="Ranmarc Wholesale Logo" className="invoice-logo" />
-      </div>
-      <h1>Ranmarc Wholesale</h1>
-      <h2>Invoice</h2>
-      <p>
-        <strong>Customer:</strong> {customerInfo?.name || 'N/A'}
-      </p>
-      <p>
-        <strong>Store:</strong> {customerInfo?.storeName || 'N/A'}
-      </p>
-      <p>
-        <strong>Phone:</strong> {customerInfo?.phoneNumber || 'N/A'}
-      </p>
-      <p>
-        <strong>Address:</strong> {customerInfo?.storeAddress || 'N/A'}
-      </p>
-      <hr />
-      <h3>Order Details</h3>
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              {[...new Set(basket.flatMap((item) => Object.keys(item)))]
-                .filter((key) => key !== 'image')
-                .map((key) => (
-                  <th key={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</th>
-                ))}
-            </tr>
-          </thead>
-          <tbody>
-            {basket.map((item, index) => (
-              <tr key={index}>
-                {[...new Set(basket.flatMap((item) => Object.keys(item)))]
-                  .filter((key) => key !== 'image')
-                  .map((key) => (
-                    <td key={key}>
-                      {item[key] !== undefined && item[key] !== null
-                        ? item[key]
-                        : 'N/A'}
-                    </td>
-                  ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <button onClick={handleDownload} className="download-btn">
-        Download Invoice
-      </button>
+    <div>
+      <h1>Invoice Processing</h1>
+      {invoiceUrl && (
+        <p>
+          You can view your invoice here: <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">{invoiceUrl}</a>
+        </p>
+      )}
     </div>
   );
 };
