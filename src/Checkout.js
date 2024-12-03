@@ -25,6 +25,12 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
     navigate('/customer-details', { state: { basket: basketState } });
   };
 
+  const handleEmptyCart = () => {
+    setBasketState([]);
+    setBasket([]);
+    console.log('Cart emptied');
+  };
+
   const incrementQuantity = (item) => {
     const updatedBasket = basketState.map((basketItem) =>
       basketItem === item
@@ -32,7 +38,7 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
         : basketItem
     );
     setBasketState(updatedBasket);
-    setBasket(updatedBasket); // Update parent basket
+    setBasket(updatedBasket);
     console.log('Incremented quantity:', updatedBasket);
   };
 
@@ -44,7 +50,7 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
           : basketItem
       );
       setBasketState(updatedBasket);
-      setBasket(updatedBasket); // Update parent basket
+      setBasket(updatedBasket);
       console.log('Decremented quantity:', updatedBasket);
     }
   };
@@ -103,6 +109,11 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
         ) : (
           <p>Your basket is currently empty.</p>
         )}
+        {basketState.length > 0 && (
+          <button onClick={handleEmptyCart} className="empty-cart-btn">
+            Empty Cart
+          </button>
+        )}
       </div>
 
       <div className="checkout__right">
@@ -121,4 +132,3 @@ const Checkout = ({ basket, setBasket = () => {} }) => {
 };
 
 export default Checkout;
-
