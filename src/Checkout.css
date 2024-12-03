@@ -1,16 +1,33 @@
+/* Base Styles */
 .checkout {
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  background: linear-gradient(135deg, #1A1A1A, #101010); /* Darker background */
+  background: linear-gradient(135deg, #1A1A1A, #101010);
   min-height: 100vh;
   font-family: 'Arial', sans-serif;
   color: #fff;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
 .checkout__left {
-  width: 65%;
+  flex: 1 1 65%;
   padding: 20px;
+  box-sizing: border-box;
+}
+
+.checkout__right {
+  flex: 1 1 30%;
+  padding: 20px;
+  box-sizing: border-box;
+  position: sticky;
+  top: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  color: #fff;
+  height: fit-content;
 }
 
 .checkout__title {
@@ -32,7 +49,7 @@
 .checkout__productCard {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.08); /* Semi-transparent for glass effect */
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
@@ -57,6 +74,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
 }
 
 .checkout__productBrand {
@@ -65,7 +83,7 @@
   font-weight: bold;
 }
 
-.checkout__productFlavor, 
+.checkout__productFlavor,
 .checkout__productPuffs {
   font-size: 1rem;
   color: #ccc;
@@ -100,18 +118,6 @@
   color: #fff;
 }
 
-.checkout__right {
-  width: 30%;
-  position: sticky;
-  top: 20px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1); /* Semi-transparent for glass effect */
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  color: #fff;
-}
-
 .checkout__summary {
   text-align: center;
 }
@@ -127,7 +133,7 @@
   width: 100%;
   padding: 15px;
   font-size: 1.2rem;
-  background: linear-gradient(135deg, #28a745, #218838); /* Gradient button */
+  background: linear-gradient(135deg, #28a745, #218838);
   border: none;
   color: white;
   cursor: pointer;
@@ -140,37 +146,99 @@
   background-color: #1e7e34;
   transform: scale(1.05);
 }
-/* General responsive layout for screens smaller than 768px */
-@media (max-width: 768px) {
-  .checkout {
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-  }
 
-  .checkout__left, .checkout__right {
-    width: 100%;
+.empty-cart-btn {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.2s;
+  font-weight: bold;
+}
+
+.empty-cart-btn:hover {
+  background-color: #e60000;
+  transform: scale(1.05);
+}
+
+/* Responsive Styles */
+
+/* Tablets and smaller devices */
+@media (max-width: 1024px) {
+  .checkout__left,
+  .checkout__right {
+    flex: 1 1 100%;
+    padding: 15px;
   }
 
   .checkout__title {
-    font-size: 2rem;
+    font-size: 2.2rem;
     text-align: center;
   }
 
   .checkout__productCard {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: row;
+    align-items: flex-start;
   }
 
   .checkout__productImage {
     width: 120px;
     height: 120px;
-    margin: 0 auto 15px;
+    margin-right: 15px;
+  }
+
+  .checkout__productBrand {
+    font-size: 1.4rem;
+  }
+
+  .checkout__productFlavor,
+  .checkout__productPuffs {
+    font-size: 0.95rem;
+  }
+
+  .quantityControl__quantity {
+    font-size: 1.2rem;
+  }
+
+  .proceed-btn,
+  .empty-cart-btn {
+    font-size: 1.1rem;
+    padding: 12px;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  .checkout {
+    padding: 15px;
+  }
+
+  .checkout__left,
+  .checkout__right {
+    padding: 10px;
+  }
+
+  .checkout__title {
+    font-size: 2rem;
+  }
+
+  .checkout__productCard {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .checkout__productImage {
+    margin-right: 0;
+    margin-bottom: 15px;
   }
 
   .checkout__productInfo {
-    display: flex;
-    flex-direction: column;
     align-items: center;
   }
 
@@ -178,14 +246,13 @@
     justify-content: center;
   }
 
-  .proceed-btn {
-    font-size: 1rem;
-    padding: 12px;
-    width: 100%;
+  .checkout__right {
+    position: static;
+    margin-top: 20px;
   }
 }
 
-/* For very small screens (up to 480px) */
+/* Small mobile devices */
 @media (max-width: 480px) {
   .checkout__title {
     font-size: 1.8rem;
@@ -195,25 +262,45 @@
     font-size: 1.2rem;
   }
 
-  .checkout__productFlavor, .checkout__productPuffs {
+  .checkout__productFlavor,
+  .checkout__productPuffs {
     font-size: 0.9rem;
   }
 
+  .quantityControl__btn {
+    padding: 8px;
+    font-size: 1rem;
+  }
+
   .quantityControl__quantity {
-    font-size: 1.2rem;
+    font-size: 1rem;
+  }
+
+  .proceed-btn,
+  .empty-cart-btn {
+    font-size: 1rem;
+    padding: 10px;
   }
 }
-.empty-cart-btn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #ff4d4d;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .checkout__title {
+    font-size: 1.6rem;
+  }
+
+  .checkout__productImage {
+    width: 100px;
+    height: 100px;
+  }
+
+  .checkout__productBrand {
+    font-size: 1rem;
+  }
+
+  .checkout__productFlavor,
+  .checkout__productPuffs {
+    font-size: 0.8rem;
+  }
 }
 
-.empty-cart-btn:hover {
-  background-color: #e60000;
-}
