@@ -1,6 +1,5 @@
 // App.js
 
-// Import React and other necessary libraries
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './Header';
@@ -13,7 +12,7 @@ import Invoice from './invoice'; // Ensure this path is correct
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 
-// Firebase configuration
+// Firebase configuration (replace with your actual config)
 const firebaseConfig = {
   apiKey: 'AIzaSyC9d3BrosC6bssgCuzrf-XzDv3JuefiIlY',
   authDomain: 'ranmarcwholesale-62352.firebaseapp.com',
@@ -34,72 +33,44 @@ function App() {
   const [searchQuery, setSearchQuery] = useState(''); // Search functionality state
 
   // Functions to handle adding and removing items in the basket
-  const handleAddToBasket = (index, puffCount, flavor, quantity) => {
-    const existingProduct = basket.find(
+  const handleAddToBasket = (basketItem) => {
+    const existingProductIndex = basket.findIndex(
       (item) =>
-        item.index === index &&
-        item.puffCount === puffCount &&
-        item.flavor === flavor
+        item.brand === basketItem.brand &&
+        item.flavor === basketItem.flavor &&
+        item.puffs === basketItem.puffs &&
+        item.type === basketItem.type
     );
 
-    if (existingProduct) {
+    if (existingProductIndex !== -1) {
       // Increment quantity
-      setBasket(
-        basket.map((item) =>
-          item.index === index &&
-          item.puffCount === puffCount &&
-          item.flavor === flavor
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        )
-      );
+      const updatedBasket = [...basket];
+      updatedBasket[existingProductIndex].quantity += basketItem.quantity;
+      setBasket(updatedBasket);
     } else {
       // Add new product to basket
-      setBasket([...basket, { index, puffCount, flavor, quantity }]);
+      setBasket([...basket, basketItem]);
     }
   };
 
-  const handleRemoveFromBasket = (index, puffCount, flavor, quantity) => {
-    const existingProduct = basket.find(
+  const handleRemoveFromBasket = (basketItem) => {
+    const updatedBasket = basket.filter(
       (item) =>
-        item.index === index &&
-        item.puffCount === puffCount &&
-        item.flavor === flavor
+        !(
+          item.brand === basketItem.brand &&
+          item.flavor === basketItem.flavor &&
+          item.puffs === basketItem.puffs &&
+          item.type === basketItem.type
+        )
     );
-
-    if (existingProduct) {
-      if (existingProduct.quantity > quantity) {
-        // Decrement quantity
-        setBasket(
-          basket.map((item) =>
-            item.index === index &&
-            item.puffCount === puffCount &&
-            item.flavor === flavor
-              ? { ...item, quantity: item.quantity - quantity }
-              : item
-          )
-        );
-      } else {
-        // Remove product if quantity reaches 0
-        setBasket(
-          basket.filter(
-            (item) =>
-              !(
-                item.index === index &&
-                item.puffCount === puffCount &&
-                item.flavor === flavor
-              )
-          )
-        );
-      }
-    }
+    setBasket(updatedBasket);
   };
 
   return (
     <Router>
       <Header
         basketCount={basket.length}
-        onSearch={(query) => setSearchQuery(query)} // Pass search handler to Header
+        onSearch={(query) => setSearchQuery(query)}
       />
       <Routes>
         <Route
@@ -107,7 +78,7 @@ function App() {
           element={
             <Home
               onAddToBasket={handleAddToBasket}
-              searchQuery={searchQuery} // Pass search query to Home
+              searchQuery={searchQuery}
             />
           }
         />
@@ -117,6 +88,7 @@ function App() {
           element={
             <Checkout
               basket={basket}
+              setBasket={setBasket} // Pass setBasket to Checkout component
               onAddToBasket={handleAddToBasket}
               onRemoveFromBasket={handleRemoveFromBasket}
             />
@@ -143,4 +115,5 @@ function App() {
 }
 
 export default App;
+
 
