@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './Invoice.css'; // Import the CSS file for styling
 
-const Invoice = () => {
+const Invoice = ({ setBasket }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { customerInfo, basket } = location.state || {};
@@ -18,7 +18,9 @@ const Invoice = () => {
       const html = generateInvoiceHTML();
       sendDataToServer(customerInfo, basket, html);
     }
-  }, [customerInfo, basket, navigate]);
+    // Clear the basket once the order is placed
+    setBasket([]);
+  }, [customerInfo, basket, navigate, setBasket]);
 
   const generateInvoiceHTML = () => {
     const headers = `
@@ -94,13 +96,13 @@ const Invoice = () => {
 
   return (
     <div className="invoice">
-      <h1>Invoice Processing</h1>
+      <h1>Order Placed Successfully</h1>
       {invoiceUrl ? (
         <>
           <p>
             You can view your invoice here:{' '}
             <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">
-              {invoiceUrl}
+              View Invoice
             </a>
           </p>
           <button className="invoice__homeButton" onClick={() => navigate('/')}>
