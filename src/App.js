@@ -107,7 +107,13 @@ function App() {
 
         <Route
           path="/invoice"
-          element={<Invoice basket={basket} customerInfo={customerInfo} />}
+          element={
+            <Invoice
+              basket={basket}
+              customerInfo={customerInfo}
+              setBasket={setBasket} // Pass setBasket to Invoice component
+            />
+          }
         />
       </Routes>
     </Router>
@@ -115,5 +121,3 @@ function App() {
 }
 
 export default App;
-
-
