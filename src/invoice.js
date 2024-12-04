@@ -1,4 +1,4 @@
-// Invoice.js
+// invoice.js
 
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -18,9 +18,9 @@ const Invoice = ({ setBasket }) => {
       const html = generateInvoiceHTML();
       sendDataToServer(customerInfo, basket, html);
     }
-    // Clear the basket once the order is placed
-    setBasket([]);
-  }, [customerInfo, basket, navigate, setBasket]);
+    // We will clear the basket after the order is successfully placed
+    // So no need to clear it here
+  }, [customerInfo, basket, navigate]);
 
   const generateInvoiceHTML = () => {
     const headers = `
@@ -88,6 +88,8 @@ const Invoice = ({ setBasket }) => {
 
       const data = await response.json();
       setInvoiceUrl(data.invoiceUrl);
+      // Clear the basket once the order is successfully placed
+      setBasket([]);
     } catch (error) {
       console.error('Error logging order:', error);
       alert('Error sending data to server: ' + error.message);
