@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 
@@ -47,7 +48,25 @@ function Home({ onAddToBasket, searchQuery }) {
     }
   }, [searchQuery, productsData]);
 
+  const fetchProductData = async () => {
+    try {
+      const response = await fetch('https://shopsmart1.onrender.com/data');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setProductsData(data);
 
+      // Automatically filter for 'CategoryImages' on data load
+      const uniqueMainCategories = data.filter(
+        (item) => item.Category === 'CategoryImages'
+      );
+      setMainCategories(uniqueMainCategories);
+      setSelectedCategory(null);
+    } catch (error) {
+      console.error('Failed to fetch or process data:', error);
+    }
+  };
 
   const handleCategoryClick = (mainCategory) => {
     setSelectedCategory(mainCategory.Brand);
