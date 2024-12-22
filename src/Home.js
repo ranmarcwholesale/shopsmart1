@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 
@@ -14,10 +13,13 @@ function Home({ onAddToBasket, searchQuery }) {
   const [selectedPuff, setSelectedPuff] = useState('');
   const [selectedFlavor, setSelectedFlavor] = useState('');
   const [brandDetails, setBrandDetails] = useState(null);
+
+  // This state is used for the "Brand Details" section
   const [quantity, setQuantity] = useState(1);
 
+  // This state will be used to track quantities for items in the search results
+  const [searchQuantities, setSearchQuantities] = useState({});
 
-  
   useEffect(() => {
     fetchProductData();
   }, []);
@@ -70,30 +72,29 @@ function Home({ onAddToBasket, searchQuery }) {
 
   const handleCategoryClick = (mainCategory) => {
     setSelectedCategory(mainCategory.Brand);
-  
+
     // Filter items based on the selected category
     const filteredItems = productsData.filter(
       (item) => item.Category === mainCategory.Brand
     );
-  
+
     // Use a Map to ensure unique brands with their images
     const uniqueBrandsMap = new Map();
-  
+
     filteredItems.forEach((item) => {
       if (!uniqueBrandsMap.has(item.Brand)) {
         uniqueBrandsMap.set(item.Brand, item.image);
       }
     });
-  
+
     // Convert the Map to an array of brand objects
     const uniqueBrands = Array.from(uniqueBrandsMap, ([brand, image]) => ({
       brand,
       image,
     }));
-  
+
     setFilteredBrands(uniqueBrands);
   };
-  
 
   const handleBrandClick = (brand) => {
     setSelectedBrand(brand);
@@ -103,43 +104,118 @@ function Home({ onAddToBasket, searchQuery }) {
     setBrandDetails(brandDetails);
   };
 
-  const incrementQuantity = () => setQuantity(quantity + 1);
+  // Reuse the same increment/decrement logic for brand details
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
   const decrementQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  };
+
+  /**
+   * The increment/decrement handlers below are specifically
+   * for items in the search results. We store their quantities
+   * in `searchQuantities`, keyed by the array index (or ID, if you had one).
+   */
+  const handleSearchIncrement = (index) => {
+    setSearchQuantities((prev) => ({
+      ...prev,
+      [index]: (prev[index] || 0) + 1,
+    }));
+  };
+
+  const handleSearchDecrement = (index) => {
+    setSearchQuantities((prev) => {
+      const currentQuantity = prev[index] || 0;
+      const newQuantity = currentQuantity > 1 ? currentQuantity - 1 : 0;
+      return {
+        ...prev,
+        [index]: newQuantity,
+      };
+    });
   };
 
   const renderSearchResults = () => {
-    if (filteredProducts.length === 0) {
+    const query = searchQuery?.toLowerCase() || '';
+
+    // Exclude rows where the Category is "CategoryImages"
+    const filtered = productsData.filter((product) => {
+      const category = product.Category?.toLowerCase() || '';
+      const brand = product.Brand?.toLowerCase() || '';
+      const flavor = product.Flavor?.toLowerCase() || '';
+      const type = product.Type?.toLowerCase() || '';
+
+      // Exclude category images
+      const isCategoryImage = category === 'categoryimages';
+
+      return (
+        !isCategoryImage &&
+        (brand.includes(query) ||
+          flavor.includes(query) ||
+          type.includes(query) ||
+          category.includes(query))
+      );
+    });
+
+    if (filtered.length === 0) {
       return <p>No results found for "{searchQuery}".</p>;
     }
+
     return (
       <div className="home__searchResults">
-        {filteredProducts.map((product, index) => (
-          <div key={index} className="home__product">
-            <img
-              src={product.image}
-              alt={product.Brand}
-              className="home__productImage"
-            />
-            <h3>{product.Brand}</h3>
-            <p>{product.Flavor}</p>
-            <button
-              className="home__addButton"
-              onClick={() => {
-                const basketItem = {
-                  brand: product.Brand,
-                  flavor: product.Flavor,
-                  puffs: product.Puffs,
-                  quantity: 1,
-                  image: product.image || '/images/placeholder.png',
-                };
-                onAddToBasket(basketItem);
-              }}
-            >
-              Add to Basket
-            </button>
-          </div>
-        ))}
+        {filtered.map((product, index) => {
+          // If we've never set a quantity for this item, default to 1
+          const itemQuantity = searchQuantities[index] || 0;
+
+          return (
+            <div key={index} className="home__product">
+              <img
+                src={product.image}
+                alt={product.Brand}
+                className="home__productImage"
+              />
+              <h3>{product.Brand}</h3>
+              <p>{product.Flavor}</p>
+
+              {/* Quantity controls (Increment/Decrement) */}
+              <div className="home__quantityControls">
+                <button
+                  onClick={() => handleSearchDecrement(index)}
+                  className="quantityButton"
+                >
+                  -
+                </button>
+                <span className="quantityValue">{itemQuantity}</span>
+                <button
+                  onClick={() => handleSearchIncrement(index)}
+                  className="quantityButton"
+                >
+                  +
+                </button>
+              </div>
+
+              <button
+                className="home__addButton"
+                onClick={() => {
+                  const basketItem = {
+                    brand: product.Brand,
+                    flavor: product.Flavor,
+                    puffs: product.Puffs,
+                    quantity: itemQuantity,
+                    image: product.image || '/images/placeholder.png',
+                  };
+                  onAddToBasket(basketItem);
+
+                  // Optionally, reset the search item’s quantity to 1 after adding
+                  setSearchQuantities((prev) => ({
+                    ...prev,
+                    [index]: 1,
+                  }));
+                }}
+              >
+                Add to Basket
+              </button>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -190,35 +266,58 @@ function Home({ onAddToBasket, searchQuery }) {
     if (!brandDetails || brandDetails.length === 0) {
       return <p>No details available for {selectedBrand}.</p>;
     }
-  
+
     const isGeneric =
       selectedCategory !== 'Kratom' &&
       selectedCategory !== 'Vapes' &&
       selectedCategory !== 'Cigars' &&
       selectedCategory !== 'Delta/THC';
-  
+
     if (isGeneric) {
-      const uniqueTypes = [...new Set(brandDetails.map((item) => item.Type).filter(Boolean))];
+      const uniqueTypes = [
+        ...new Set(brandDetails.map((item) => item.Type).filter(Boolean)),
+      ];
       const uniquePuffs = selectedType
-        ? [...new Set(brandDetails.filter((item) => item.Type === selectedType).map((item) => item.Puffs).filter(Boolean))]
-        : [...new Set(brandDetails.map((item) => item.Puffs).filter(Boolean))];
-      const uniqueFlavors = selectedType || selectedPuff
-        ? [...new Set(brandDetails
-            .filter((item) =>
-              (!selectedType || item.Type === selectedType) &&
-              (!selectedPuff || item.Puffs === selectedPuff)
-            )
-            .map((item) => item.Flavor)
-            .filter(Boolean))]
-        : [...new Set(brandDetails.map((item) => item.Flavor).filter(Boolean))];
-  
+        ? [
+            ...new Set(
+              brandDetails
+                .filter((item) => item.Type === selectedType)
+                .map((item) => item.Puffs)
+                .filter(Boolean)
+            ),
+          ]
+        : [
+            ...new Set(
+              brandDetails.map((item) => item.Puffs).filter(Boolean)
+            ),
+          ];
+      const uniqueFlavors =
+        selectedType || selectedPuff
+          ? [
+              ...new Set(
+                brandDetails
+                  .filter(
+                    (item) =>
+                      (!selectedType || item.Type === selectedType) &&
+                      (!selectedPuff || item.Puffs === selectedPuff)
+                  )
+                  .map((item) => item.Flavor)
+                  .filter(Boolean)
+              ),
+            ]
+          : [
+              ...new Set(
+                brandDetails.map((item) => item.Flavor).filter(Boolean)
+              ),
+            ];
+
       return (
         <div className="home__brandDetails">
           <div className="home__brandImage">
             <img src={brandDetails[0].image} alt={selectedBrand} />
           </div>
           <h3>{selectedBrand}</h3>
-  
+
           {/* Type Dropdown */}
           {uniqueTypes.length > 0 && (
             <div className="home__option">
@@ -241,7 +340,7 @@ function Home({ onAddToBasket, searchQuery }) {
               </select>
             </div>
           )}
-  
+
           {/* Puffs Dropdown */}
           {uniquePuffs.length > 0 && (
             <div className="home__option">
@@ -263,7 +362,7 @@ function Home({ onAddToBasket, searchQuery }) {
               </select>
             </div>
           )}
-  
+
           {/* Flavor Dropdown */}
           {uniqueFlavors.length > 0 && (
             <div className="home__option">
@@ -282,7 +381,7 @@ function Home({ onAddToBasket, searchQuery }) {
               </select>
             </div>
           )}
-  
+
           {/* Quantity Controls */}
           {(!uniqueTypes.length || selectedType) &&
             (!uniquePuffs.length || selectedPuff) &&
@@ -303,7 +402,7 @@ function Home({ onAddToBasket, searchQuery }) {
                 </button>
               </div>
             )}
-  
+
           {/* Add to Basket */}
           {(!uniqueTypes.length || selectedType) &&
             (!uniquePuffs.length || selectedPuff) &&
@@ -320,6 +419,8 @@ function Home({ onAddToBasket, searchQuery }) {
                     image: brandDetails[0]?.image || '/images/placeholder.png',
                   };
                   onAddToBasket(basketItem);
+
+                  // Reset our local states after adding to basket
                   setQuantity(1);
                   setSelectedType('');
                   setSelectedPuff('');
@@ -332,9 +433,10 @@ function Home({ onAddToBasket, searchQuery }) {
         </div>
       );
     }
-  
+
     const isKratom = selectedCategory === 'Kratom';
     const isCigars = selectedCategory === 'Cigars';
+
     if (isKratom) {
       const uniqueTypes = [...new Set(brandDetails.map((item) => item.Type))];
       const quantities = selectedType
@@ -418,25 +520,17 @@ function Home({ onAddToBasket, searchQuery }) {
                 </select>
               </div>
             )}
-            {selectedType &&
-              selectedQuantityDescription &&
-              selectedFlavor && (
-                <div className="home__quantityControls">
-                  <button
-                    onClick={decrementQuantity}
-                    className="quantityButton"
-                  >
-                    -
-                  </button>
-                  <span className="quantityValue">{quantity}</span>
-                  <button
-                    onClick={incrementQuantity}
-                    className="quantityButton"
-                  >
-                    +
-                  </button>
-                </div>
-              )}
+            {selectedType && selectedQuantityDescription && selectedFlavor && (
+              <div className="home__quantityControls">
+                <button onClick={decrementQuantity} className="quantityButton">
+                  -
+                </button>
+                <span className="quantityValue">{quantity}</span>
+                <button onClick={incrementQuantity} className="quantityButton">
+                  +
+                </button>
+              </div>
+            )}
             {selectedType &&
               selectedQuantityDescription &&
               selectedFlavor && (
@@ -451,6 +545,7 @@ function Home({ onAddToBasket, searchQuery }) {
                       image: brandDetails[0]?.image || '/images/placeholder.png',
                     };
                     onAddToBasket(basketItem);
+                    // Reset our local states after adding to basket
                     setQuantity(1);
                     setSelectedType('');
                     setSelectedQuantityDescription('');
@@ -515,26 +610,18 @@ function Home({ onAddToBasket, searchQuery }) {
                 </select>
               </div>
             )}
-            {((isCigars && selectedFlavor) ||
-              (selectedPuff && selectedFlavor)) && (
+            {((isCigars && selectedFlavor) || (selectedPuff && selectedFlavor)) && (
               <div className="home__quantityControls">
-                <button
-                  onClick={decrementQuantity}
-                  className="quantityButton"
-                >
+                <button onClick={decrementQuantity} className="quantityButton">
                   -
                 </button>
                 <span className="quantityValue">{quantity}</span>
-                <button
-                  onClick={incrementQuantity}
-                  className="quantityButton"
-                >
+                <button onClick={incrementQuantity} className="quantityButton">
                   +
                 </button>
               </div>
             )}
-            {((isCigars && selectedFlavor) ||
-              (selectedPuff && selectedFlavor)) && (
+            {((isCigars && selectedFlavor) || (selectedPuff && selectedFlavor)) && (
               <button
                 className="home__addButton"
                 onClick={() => {
@@ -546,6 +633,7 @@ function Home({ onAddToBasket, searchQuery }) {
                     image: brandDetails[0]?.image || '/images/placeholder.png',
                   };
                   onAddToBasket(basketItem);
+                  // Reset local states after adding to basket
                   setQuantity(1);
                   setSelectedPuff('');
                   setSelectedFlavor('');
