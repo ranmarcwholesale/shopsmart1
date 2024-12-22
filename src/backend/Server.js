@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -13,7 +11,6 @@ const { v4: uuidv4 } = require('uuid'); // Library for generating unique IDs
 const crypto = require('crypto'); // Library for hashing
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Use CORS middleware
 app.use(cors());
@@ -46,6 +43,11 @@ const saveOrders = (orders) => {
   fs.writeFileSync(ordersPath, JSON.stringify(orders, null, 2));
 };
 
+// Root route for testing
+app.get('/', (req, res) => {
+  res.send('Backend is running. Use the appropriate endpoints.');
+});
+
 // Endpoint to fetch data from Google Sheets (CSV format)
 app.get('/data', async (req, res) => {
   try {
@@ -68,43 +70,34 @@ app.get('/data', async (req, res) => {
 app.post('/log-order', async (req, res) => {
   const { customerInfo, basket, invoiceHTML } = req.body;
 
-  // Validate incoming data
   if (!customerInfo || !basket || !invoiceHTML) {
     console.error('Invalid request data:', req.body);
     return res.status(400).send('Invalid request data');
   }
 
-  // Generate a hash of the order data to detect duplicates
   const orderDataString = JSON.stringify({ customerInfo, basket });
   const orderHash = crypto.createHash('sha256').update(orderDataString).digest('hex');
 
-  // Load existing orders
   let orders = loadOrders();
-
-  // Get the current time
   const now = new Date();
 
-  // Check if an identical order was placed within the last 5 minutes
   const existingOrder = orders.find((order) => {
     return (
       order.orderHash === orderHash &&
-      now - new Date(order.dateTime) < 5 * 60 * 1000 // 5 minutes in milliseconds
+      now - new Date(order.dateTime) < 5 * 60 * 1000
     );
   });
 
   if (existingOrder) {
-    console.log(`Duplicate order detected. Ignoring request for orderHash: ${orderHash}`);
+    console.log(`Duplicate order detected for orderHash: ${orderHash}`);
     return res.status(200).send({
       message: 'Order with this data already processed recently.',
       invoiceUrl: existingOrder.invoiceUrl,
     });
   }
 
-  // Generate a unique order ID
   const orderId = uuidv4();
-
-  // Save the new order ID to prevent duplicate processing
-  const dateTime = now.toISOString(); // Use ISO string format for consistency
+  const dateTime = now.toISOString();
   let invoiceFilename = `invoice_${orderId}.pdf`;
   const invoiceFilePath = path.join(INVOICES_DIR, invoiceFilename);
   const invoiceUrl = `${req.protocol}://${req.get('host')}/invoices/${invoiceFilename}`;
@@ -116,12 +109,11 @@ app.post('/log-order', async (req, res) => {
     basket,
     invoiceFilename,
     invoiceUrl,
-    emailSent: false, // Email not yet sent
+    emailSent: false,
   };
   orders.push(newOrder);
   saveOrders(orders);
 
-  // Generate invoice PDF
   try {
     await new Promise((resolve, reject) => {
       pdf.create(invoiceHTML).toFile(invoiceFilePath, (err) => {
@@ -135,28 +127,26 @@ app.post('/log-order', async (req, res) => {
     return res.status(500).send('Failed to generate invoice.');
   }
 
-  // Send email with the PDF invoice attached
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'ranmarcwholesale@gmail.com', // Your email
-        pass: 'tqye sqdk wkwp eapq', // Replace with your email password
+        user: 'ranmarcwholesale@gmail.com',
+        pass: 'tqye sqdk wkwp eapq',
       },
       tls: {
         rejectUnauthorized: false,
       },
     });
 
-    const wholesalerEmail = 'ranmarcwholesale@gmail.com'; // Replace with your desired recipient email
+    const wholesalerEmail = 'ranmarcwholesale@gmail.com';
 
-    // Update product details mapping to match the new data structure
     const productDetails = basket
       .map(
         (item) =>
-          `${item.brand} - ${item.flavor} ${
-            item.type ? `(Type: ${item.type})` : ''
-          } ${item.puffs ? `(Puffs: ${item.puffs})` : ''}, Quantity: ${item.quantity}`
+          `${item.brand} - ${item.flavor} ${item.type ? `(Type: ${item.type})` : ''} ${
+            item.puffs ? `(Puffs: ${item.puffs})` : ''
+          }, Quantity: ${item.quantity}`
       )
       .join('; ');
 
@@ -181,7 +171,7 @@ app.post('/log-order', async (req, res) => {
       attachments: [
         {
           filename: invoiceFilename,
-          path: invoiceFilePath, // Attach the generated PDF invoice
+          path: invoiceFilePath,
         },
       ],
     };
@@ -189,7 +179,6 @@ app.post('/log-order', async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log('Email sent successfully with invoice attached.');
 
-    // Mark the email as sent
     orders = loadOrders();
     const orderIndex = orders.findIndex((order) => order.id === orderId);
     if (orderIndex !== -1) {
@@ -210,7 +199,5 @@ app.post('/log-order', async (req, res) => {
 // Serve invoices for direct access
 app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
 
-// Listen on the specified port
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export the app for Vercel
+module.exports = app;
