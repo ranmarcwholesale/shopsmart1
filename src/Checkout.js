@@ -1,5 +1,3 @@
-// Checkout.js
-
 import React, { useState, useEffect } from 'react';
 import './Checkout.css';
 import { useNavigate } from 'react-router-dom';
@@ -60,6 +58,12 @@ const Checkout = ({ basket, setBasket }) => {
       setBasketState(updatedBasket);
       setBasket(updatedBasket);
       console.log('Decremented quantity:', updatedBasket);
+    } else {
+      // Remove the item if quantity is 1
+      const updatedBasket = basketState.filter((basketItem) => basketItem !== item);
+      setBasketState(updatedBasket);
+      setBasket(updatedBasket);
+      console.log('Removed item from basket:', updatedBasket);
     }
   };
 
@@ -111,7 +115,6 @@ const Checkout = ({ basket, setBasket }) => {
                     <button
                       className="quantityControl__btn decrement"
                       onClick={() => decrementQuantity(item)}
-                      disabled={item.quantity <= 1}
                     >
                       -
                     </button>
@@ -141,13 +144,14 @@ const Checkout = ({ basket, setBasket }) => {
 
       <div className="checkout__right">
         <div className="checkout__summary">
-          <h2>Order Summary</h2>
           {basketState.some((item) => item.price) && (
             <p>Subtotal: ${calculateSubtotal()}</p>
           )}
-          <button onClick={handleProceedToCheckout} className="proceed-btn">
-            Proceed to Checkout
-          </button>
+          {basketState.length > 0 &&(
+             <button onClick={handleProceedToCheckout} className="proceed-btn">
+             Proceed to Checkout
+           </button>
+          )}
         </div>
       </div>
     </div>
