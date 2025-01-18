@@ -8,9 +8,9 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const pdf = require('html-pdf'); // Library to generate PDFs
-const { v4: uuidv4 } = require('uuid'); // Library for generating unique IDs
-const crypto = require('crypto'); // Library for hashing
+const puppeteer = require('puppeteer'); // <-- Puppeteer
+const { v4: uuidv4 } = require('uuid'); 
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,8 +23,11 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Replace with your Google Sheet's published CSV URL
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9yTFEyHsOfYjdzQtOriWq0s5EuxhYNrRyqxCYKeTROfW4tMvfPzB84q6f8V2C8Tt-Zmi90lcYKsCS/pub?output=csv';
+const SHEET_CSV_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9yTFEyHsOfYjdzQtOriWq0s5EuxhYNrRyqxCYKeTROfW4tMvfPzB84q6f8V2C8Tt-Zmi90lcYKsCS/pub?output=csv';
 
+
+  
 // File paths
 const ordersPath = path.join(__dirname, 'orders.json');
 const INVOICES_DIR = path.join(__dirname, 'invoices');
@@ -33,18 +36,18 @@ if (!fs.existsSync(INVOICES_DIR)) {
 }
 
 // Utility to load orders from file
-const loadOrders = () => {
+function loadOrders() {
   if (fs.existsSync(ordersPath)) {
     const data = fs.readFileSync(ordersPath, 'utf8');
     return JSON.parse(data);
   }
   return [];
-};
+}
 
 // Utility to save orders to file
-const saveOrders = (orders) => {
+function saveOrders(orders) {
   fs.writeFileSync(ordersPath, JSON.stringify(orders, null, 2));
-};
+}
 
 // Endpoint to fetch data from Google Sheets (CSV format)
 app.get('/data', async (req, res) => {
@@ -76,7 +79,10 @@ app.post('/log-order', async (req, res) => {
 
   // Generate a hash of the order data to detect duplicates
   const orderDataString = JSON.stringify({ customerInfo, basket });
-  const orderHash = crypto.createHash('sha256').update(orderDataString).digest('hex');
+  const orderHash = crypto
+    .createHash('sha256')
+    .update(orderDataString)
+    .digest('hex');
 
   // Load existing orders
   let orders = loadOrders();
@@ -93,7 +99,9 @@ app.post('/log-order', async (req, res) => {
   });
 
   if (existingOrder) {
-    console.log(`Duplicate order detected. Ignoring request for orderHash: ${orderHash}`);
+    console.log(
+      `Duplicate order detected. Ignoring request for orderHash: ${orderHash}`
+    );
     return res.status(200).send({
       message: 'Order with this data already processed recently.',
       invoiceUrl: existingOrder.invoiceUrl,
@@ -105,9 +113,10 @@ app.post('/log-order', async (req, res) => {
 
   // Save the new order ID to prevent duplicate processing
   const dateTime = now.toISOString(); // Use ISO string format for consistency
-  let invoiceFilename = `invoice_${orderId}.pdf`;
+  const invoiceFilename = `invoice_${orderId}.pdf`;
   const invoiceFilePath = path.join(INVOICES_DIR, invoiceFilename);
   const invoiceUrl = `${req.protocol}://${req.get('host')}/invoices/${invoiceFilename}`;
+
   const newOrder = {
     id: orderId,
     dateTime,
@@ -121,17 +130,30 @@ app.post('/log-order', async (req, res) => {
   orders.push(newOrder);
   saveOrders(orders);
 
-  // Generate invoice PDF
+  // Generate invoice PDF using Puppeteer
   try {
-    await new Promise((resolve, reject) => {
-      pdf.create(invoiceHTML).toFile(invoiceFilePath, (err) => {
-        if (err) return reject(err);
-        resolve();
-      });
+    const browser = await puppeteer.launch({
+      headless: 'new', // or true (for Puppeteer 19+), some platforms need 'new'
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
+    const page = await browser.newPage();
+
+    // Set the HTML content
+    await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
+    // Some systems require setting the media type for correct rendering
+    await page.emulateMediaType('screen');
+
+    // Generate PDF and save to file path
+    await page.pdf({
+      path: invoiceFilePath,
+      format: 'A4',
+      printBackground: true,
+    });
+
+    await browser.close();
     console.log(`Invoice PDF generated: ${invoiceFilePath}`);
   } catch (error) {
-    console.error('Error generating PDF invoice:', error);
+    console.error('Error generating PDF invoice with Puppeteer:', error);
     return res.status(500).send('Failed to generate invoice.');
   }
 
@@ -154,9 +176,11 @@ app.post('/log-order', async (req, res) => {
     const productDetails = basket
       .map(
         (item) =>
-          `${item.brand} - ${item.flavor} ${
-            item.type ? `(Type: ${item.type})` : ''
-          } ${item.puffs ? `(Puffs: ${item.puffs})` : ''}, Quantity: ${item.quantity}`
+          `${item.brand} - ${item.flavor}${
+            item.type ? ` (Type: ${item.type})` : ''
+          }${item.puffs ? ` (Puffs: ${item.puffs})` : ''}, Quantity: ${
+            item.quantity
+          }`
       )
       .join('; ');
 
@@ -197,13 +221,13 @@ app.post('/log-order', async (req, res) => {
       saveOrders(orders);
     }
 
-    res.status(200).send({
+    return res.status(200).send({
       message: 'Order logged and wholesaler notified successfully.',
       invoiceUrl,
     });
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).send('Failed to send order details to wholesaler.');
+    return res.status(500).send('Failed to send order details to wholesaler.');
   }
 });
 
