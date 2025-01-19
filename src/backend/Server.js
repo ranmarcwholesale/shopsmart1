@@ -8,12 +8,20 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const puppeteer = require('puppeteer'); // <-- Puppeteer
+const puppeteer = require('puppeteer-core');
+const chromium = require('chrome-aws-lambda'); // <-- Puppeteer
 const { v4: uuidv4 } = require('uuid'); 
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const browser = await puppeteer.launch({
+  headless: true,
+  executablePath: await chromium.executablePath,
+  args: chromium.args,
+  defaultViewport: chromium.defaultViewport,
+});
 
 // Use CORS middleware
 app.use(cors());
@@ -132,7 +140,7 @@ app.post('/log-order', async (req, res) => {
   // Generate invoice PDF using Puppeteer
   try {
     const browser = await puppeteer.launch({
-      headless: true, // Run in headless mode for servers
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -140,8 +148,10 @@ app.post('/log-order', async (req, res) => {
         '--disable-gpu',
         '--no-zygote',
         '--single-process',
+        '--font-render-hinting=none',
       ],
     });
+    
     
         
   
