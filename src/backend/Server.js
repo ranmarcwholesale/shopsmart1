@@ -1,5 +1,3 @@
-// src/backend/Server.js
-
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -8,20 +6,20 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const puppeteer = require('puppeteer'); // Using full puppeteer, not puppeteer-core
+const puppeteer = require('puppeteer'); // Puppeteer with system-installed Chromium
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Puppeteer initialization (using system Chromium)
+// Puppeteer browser initialization
 let browser;
 (async () => {
   try {
     browser = await puppeteer.launch({
-      headless: 'new', // or 'true' on older versions
-      executablePath: 'chromium',  // <-- Tells Puppeteer to use the system chromium
+      headless: 'new', // New headless mode (or true for older versions)
+      executablePath: '/usr/bin/chromium', // Path to system-installed Chromium
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -29,7 +27,6 @@ let browser;
         '--disable-gpu',
         '--no-zygote',
         '--single-process',
-        '--font-render-hinting=none',
       ],
     });
     console.log('Puppeteer launched successfully with system Chromium.');
@@ -83,7 +80,7 @@ app.get('/data', async (req, res) => {
   }
 });
 
-// Log orders, generate PDF invoices, send email
+// Log orders, generate PDF invoices, and send email
 app.post('/log-order', async (req, res) => {
   const { customerInfo, basket, invoiceHTML } = req.body;
 
