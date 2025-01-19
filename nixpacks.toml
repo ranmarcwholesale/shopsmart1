@@ -1,8 +1,7 @@
 # nixpacks.toml
-
 [phases.setup]
 nixPkgs = [
-  "chromium",      # <-- Tells Nixpacks to install system Chromium
+  "chromium",
   "alsa-lib",
   "at-spi2-atk",
   "atk",
@@ -11,11 +10,11 @@ nixPkgs = [
   "dbus-glib",
   "pango",
   "nss",
-  "libxcomposite",
-  "libxdamage",
-  "libxrandr",
-  "libxi",
-  "libxcursor",
-  "libxinerama",
+  "libXcomposite",
+  "libXcursor",
+  "libXdamage",
+  "libXi",
+  "libXinerama",
+  "libXrandr",
   "xdg-utils"
 ]
