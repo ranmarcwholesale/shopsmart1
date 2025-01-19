@@ -143,8 +143,7 @@ app.post('/log-order', async (req, res) => {
         '--single-process',
       ],
     });
-    
-    
+        
   
     const page = await browser.newPage();
     await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
