@@ -8,19 +8,20 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const puppeteer = require('puppeteer');  // <-- Use puppeteer instead of puppeteer-core
+const puppeteer = require('puppeteer'); // Using full puppeteer, not puppeteer-core
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Puppeteer browser initialization
+// Puppeteer initialization (using system Chromium)
 let browser;
 (async () => {
   try {
     browser = await puppeteer.launch({
-      headless: true, // or "new" if you're on Puppeteer 19+ and want the new headless mode
+      headless: 'new', // or 'true' on older versions
+      executablePath: 'chromium',  // <-- Tells Puppeteer to use the system chromium
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -31,15 +32,13 @@ let browser;
         '--font-render-hinting=none',
       ],
     });
+    console.log('Puppeteer launched successfully with system Chromium.');
   } catch (error) {
     console.error('Error launching Puppeteer:', error);
   }
 })();
 
-// Use CORS middleware
 app.use(cors());
-
-// Parse JSON bodies
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -54,7 +53,6 @@ if (!fs.existsSync(INVOICES_DIR)) {
   fs.mkdirSync(INVOICES_DIR);
 }
 
-// Utility to load orders from file
 function loadOrders() {
   if (fs.existsSync(ordersPath)) {
     const data = fs.readFileSync(ordersPath, 'utf8');
@@ -63,12 +61,11 @@ function loadOrders() {
   return [];
 }
 
-// Utility to save orders to file
 function saveOrders(orders) {
   fs.writeFileSync(ordersPath, JSON.stringify(orders, null, 2));
 }
 
-// Endpoint to fetch data from Google Sheets (CSV format)
+// Fetch data from Google Sheets
 app.get('/data', async (req, res) => {
   try {
     const response = await axios.get(SHEET_CSV_URL, { responseType: 'stream' });
@@ -86,7 +83,7 @@ app.get('/data', async (req, res) => {
   }
 });
 
-// Endpoint to log orders, generate PDF invoices, and send email notifications
+// Log orders, generate PDF invoices, send email
 app.post('/log-order', async (req, res) => {
   const { customerInfo, basket, invoiceHTML } = req.body;
 
@@ -101,7 +98,7 @@ app.post('/log-order', async (req, res) => {
   let orders = loadOrders();
   const now = new Date();
 
-  // Check if an identical order has been processed in the past 5 minutes
+  // Check for duplicate orders in past 5 min
   const existingOrder = orders.find((order) => {
     return (
       order.orderHash === orderHash &&
@@ -138,8 +135,11 @@ app.post('/log-order', async (req, res) => {
   orders.push(newOrder);
   saveOrders(orders);
 
-  // Generate invoice PDF using Puppeteer
+  // Generate PDF
   try {
+    if (!browser) {
+      throw new Error('Browser not initialized yet');
+    }
     const page = await browser.newPage();
     await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
     await page.emulateMediaType('screen');
@@ -157,7 +157,7 @@ app.post('/log-order', async (req, res) => {
     return res.status(500).json({ message: 'Failed to generate invoice.' });
   }
 
-  // Send email with attached invoice
+  // Email logic
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -212,7 +212,6 @@ app.post('/log-order', async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log('Email sent successfully with invoice attached.');
 
-    // Mark this order's email as sent
     orders = loadOrders();
     const orderIndex = orders.findIndex((order) => order.id === orderId);
     if (orderIndex !== -1) {
@@ -230,10 +229,9 @@ app.post('/log-order', async (req, res) => {
   }
 });
 
-// Serve invoices for direct access
+// Serve invoices folder
 app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
 
-// Listen on the specified port
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

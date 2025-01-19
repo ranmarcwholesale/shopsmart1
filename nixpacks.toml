@@ -1,31 +1,21 @@
+# nixpacks.toml
+
 [phases.setup]
-# Add required libraries for Puppeteer
-apt_pkgs = [
-  "libatk-bridge2.0-0",
-  "libasound2",
-  "libcairo2",
-  "libcups2",
-  "libdbus-1-3",
-  "libnss3",
-  "libxss1",
-  "xdg-utils",
-  "libatk1.0-0",
-  "libgbm-dev",
-  "libx11-xcb-dev",
-  "libxcomposite1",
-  "libxrandr2",
-  "libpangocairo-1.0-0",
-  "libpangoft2-1.0-0",
-  "fonts-liberation",
-  "libjpeg62-turbo",
-  "libwayland-client0",
-  "libwayland-egl1",
-  "libwayland-cursor0",
-  "libgdk-pixbuf2.0-0",
-  "libxdamage1",
-  "libgstreamer-gl1.0-0",
-  "libgstreamer-plugins-base1.0-0",
-  "gstreamer1.0-plugins-base",
-  "gstreamer1.0-plugins-good",
-  "gstreamer1.0-libav"
+nixPkgs = [
+  "chromium",      # <-- Tells Nixpacks to install system Chromium
+  "alsa-lib",
+  "at-spi2-atk",
+  "atk",
+  "cairo",
+  "cups",
+  "dbus-glib",
+  "pango",
+  "nss",
+  "libxcomposite",
+  "libxdamage",
+  "libxrandr",
+  "libxi",
+  "libxcursor",
+  "libxinerama",
+  "xdg-utils"
 ]
