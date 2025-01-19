@@ -133,28 +133,34 @@ app.post('/log-order', async (req, res) => {
   // Generate invoice PDF using Puppeteer
   try {
     const browser = await puppeteer.launch({
-      headless: 'new', // or true (for Puppeteer 19+), some platforms need 'new'
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-zygote',
+        '--single-process',
+      ],
+      executablePath: '/usr/bin/chromium-browser', // If using system-installed Chrome
     });
+  
     const page = await browser.newPage();
-
-    // Set the HTML content
     await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
-    // Some systems require setting the media type for correct rendering
     await page.emulateMediaType('screen');
-
-    // Generate PDF and save to file path
+  
+    // Generate PDF
     await page.pdf({
       path: invoiceFilePath,
       format: 'A4',
       printBackground: true,
     });
-
+  
     await browser.close();
     console.log(`Invoice PDF generated: ${invoiceFilePath}`);
   } catch (error) {
     console.error('Error generating PDF invoice with Puppeteer:', error);
-    return res.status(500).send('Failed to generate invoice.');
+    return res.status(500).json({ message: 'Failed to generate invoice.' });
   }
 
   // Send email with the PDF invoice attached

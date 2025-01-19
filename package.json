@@ -36,7 +36,7 @@
     "nodemailer": "^6.9.16",
     "path": "^0.12.7",
     "pdfkit": "^0.15.0",
-    "puppeteer": "^23.11.1",
+    "puppeteer": "19.7.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.0",
