@@ -132,8 +132,7 @@ app.post('/log-order', async (req, res) => {
   // Generate invoice PDF using Puppeteer
   try {
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium-browser',
-      headless: true,
+      headless: true, // Run in headless mode for servers
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -143,6 +142,7 @@ app.post('/log-order', async (req, res) => {
         '--single-process',
       ],
     });
+    
         
   
     const page = await browser.newPage();

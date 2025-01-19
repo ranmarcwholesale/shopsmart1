@@ -1,6 +1,6 @@
 [phases.setup]
 aptPkgs = [
-  "chromium",
+  "chromium-browser",
   "fonts-liberation",
   "gconf-service",
   "libappindicator1",
