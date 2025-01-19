@@ -1,3 +1,5 @@
+// src/backend/Server.js
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -6,8 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const puppeteer = require('puppeteer-core');
-const chromium = require('chrome-aws-lambda'); // For Railway-compatible Chromium
+const puppeteer = require('puppeteer');  // <-- Use puppeteer instead of puppeteer-core
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
@@ -17,21 +18,22 @@ const PORT = process.env.PORT || 5000;
 // Puppeteer browser initialization
 let browser;
 (async () => {
-  browser = await puppeteer.launch({
-    headless: true,
-    executablePath: await chromium.executablePath,
-    args: [
-      ...chromium.args,
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--no-zygote',
-      '--single-process',
-      '--font-render-hinting=none',
-    ],
-    defaultViewport: chromium.defaultViewport,
-  });
+  try {
+    browser = await puppeteer.launch({
+      headless: true, // or "new" if you're on Puppeteer 19+ and want the new headless mode
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-zygote',
+        '--single-process',
+        '--font-render-hinting=none',
+      ],
+    });
+  } catch (error) {
+    console.error('Error launching Puppeteer:', error);
+  }
 })();
 
 // Use CORS middleware
@@ -99,6 +101,7 @@ app.post('/log-order', async (req, res) => {
   let orders = loadOrders();
   const now = new Date();
 
+  // Check if an identical order has been processed in the past 5 minutes
   const existingOrder = orders.find((order) => {
     return (
       order.orderHash === orderHash &&
@@ -154,6 +157,7 @@ app.post('/log-order', async (req, res) => {
     return res.status(500).json({ message: 'Failed to generate invoice.' });
   }
 
+  // Send email with attached invoice
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -208,6 +212,7 @@ app.post('/log-order', async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log('Email sent successfully with invoice attached.');
 
+    // Mark this order's email as sent
     orders = loadOrders();
     const orderIndex = orders.findIndex((order) => order.id === orderId);
     if (orderIndex !== -1) {
