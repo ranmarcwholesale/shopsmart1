@@ -71,10 +71,9 @@ app.get('/data', async (req, res) => {
 app.post('/log-order', async (req, res) => {
   const { customerInfo, basket, invoiceHTML } = req.body;
 
-  // Validate incoming data
   if (!customerInfo || !basket || !invoiceHTML) {
-    console.error('Invalid request data:', req.body);
-    return res.status(400).send('Invalid request data');
+    console.error('Invalid request data:', { customerInfo, basket, invoiceHTML });
+    return res.status(400).json({ message: 'Invalid request data' });
   }
 
   // Generate a hash of the order data to detect duplicates
@@ -142,8 +141,8 @@ app.post('/log-order', async (req, res) => {
         '--no-zygote',
         '--single-process',
       ],
-      executablePath: '/usr/bin/chromium-browser', // If using system-installed Chrome
     });
+    
   
     const page = await browser.newPage();
     await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
